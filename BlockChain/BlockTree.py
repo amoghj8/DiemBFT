@@ -1,4 +1,5 @@
-from _typeshed import Self
+from BlockChain.Block import Block
+from BlockChain.QC import QC
 import Ledger
 
 class BlockTree:
@@ -21,10 +22,23 @@ class BlockTree:
                 pass
             self.high_commit_qc = max(self.high_commit_qc, qc.vote_info.round)
         self.high_qc = max(self.high_qc, qc.vote_info.round)
+        
+    def prune_pending_block_tree(self, parent_id):
+        self.pending_block_tree = self.pending_block_tree.children[parent_id]        
 
     def execute_and_insert(self, b):
         Ledger.speculate(b.qc.block_id, b.id, b.payload)
         self.pending_block_tree.children.append(b)
+        
+    def process_vote(self, voteMessage):
+        process_qc(voteMessage.high_commit_qc)
+        vote_idx = hash(voteMessage.ledger_commit_info)
+        pending_votes[vote_idx] = pending_votes[vote_idx] or voteMessage.signature
+        if (len(pending_votes[vote_idx]) == 2 * f + 1):
+            qc = QC(voteMessage.vote_info, pending_votes[vote_idx], "Author 1", "Signature 1")
+            return qc
+        return None
 
-    def prune_pending_block_tree(self, parent_id):
-        self.pending_block_tree = self.pending_block_tree.children[parent_id]
+    def generate_block(self, txns, current_round):
+        return Block("Block Author 1", current_round, txns, self.high_qc, hash("Author 1" + current_round + txns + self.high_qc.vote_info.id + self.high_qc.signatures))
+  
