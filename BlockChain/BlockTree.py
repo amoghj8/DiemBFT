@@ -38,5 +38,7 @@ class BlockTree:
             return qc
         return None
 
-    def generate_block(self, txns, current_round):
-        return Block("Block Author 1", current_round, txns, self.high_qc, hash("Author 1" + current_round + txns + self.high_qc.vote_info.id + self.high_qc.signatures))
+    def generate_block(self, txns, current_round, parentBlock):
+        newBlock = Block("Block Author 1", current_round, txns, self.high_qc, hash("Author 1" + current_round + txns + self.high_qc.vote_info.id + self.high_qc.signatures), parentBlock.id)
+        parentBlock.children[newBlock.id] = newBlock
+        return newBlock
