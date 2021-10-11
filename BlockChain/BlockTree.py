@@ -10,7 +10,6 @@ class BlockTree:
         self.high_commit_qc = high_commit_qc
         self.pending_block_tree = pending_block_tree
 
-
     def process_qc(self, qc):
         if qc.ledger_commit_info.commit_state_id is not None:
             if Ledger.commit(qc.vote_info.parent_id):
@@ -41,4 +40,3 @@ class BlockTree:
 
     def generate_block(self, txns, current_round):
         return Block("Block Author 1", current_round, txns, self.high_qc, hash("Author 1" + current_round + txns + self.high_qc.vote_info.id + self.high_qc.signatures))
-  

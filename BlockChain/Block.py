@@ -8,3 +8,5 @@ class Block:
         self.qc = qc
         self.id = id
         self.children = defaultdict(list)
+        self.parentid = -1
+        
