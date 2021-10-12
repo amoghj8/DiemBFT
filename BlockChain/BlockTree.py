@@ -15,7 +15,7 @@ class BlockTree:
             if Ledger.commit(qc.vote_info.parent_id):
                 # parent id becomes the new root of the pending block tree
                 # prune the pending Block Tree
-                pass
+                self.prune_pending_block_tree(qc.vote_info.parent_id)
             else:
                 # handle the case when commit fails
                 pass
@@ -23,11 +23,15 @@ class BlockTree:
         self.high_qc = max(self.high_qc, qc.vote_info.round)
         
     def prune_pending_block_tree(self, parent_id):
+        #Doesn't work always. Possible that direct children of pending block tree
+        #is what we wish to prune to
+        #Assume levels of non-TC yet wrong sequence ids, and later the pruning happens
+        #Should be dfs till the level where voteinfo.id == parent_id and set that node 
         self.pending_block_tree = self.pending_block_tree.children[parent_id]        
 
     def execute_and_insert(self, b):
         Ledger.speculate(b.qc.block_id, b.id, b.payload)
-        self.pending_block_tree.children.append(b)
+        self.pending_block_tree.children[b.id] = b
         
     def process_vote(self, voteMessage):
         self.process_qc(voteMessage.high_commit_qc)

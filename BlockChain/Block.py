@@ -8,5 +8,5 @@ class Block:
         self.qc = qc
         self.id = id
         self.children = defaultdict(list)
-        self.parentid = -1
-        
+        #Parent id is redundant. Get from qc.vote info.parent id
+        #Also not needed
