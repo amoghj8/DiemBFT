@@ -1,0 +1,38 @@
+import sys
+class Client(process):
+    def setup(client_id : int): pass
+
+    def run():
+        output("Client Spawned, id = ", self.client_id)
+
+class Replica(process):
+    def setup(replica_id : int): pass
+
+    def run():
+        output("Replica Spawned, id = ", self.replica_id)
+
+def main():
+    nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 3
+    nreplicas = int(sys.argv[2]) if len(sys.argv) > 2 else 10
+    ngst = 3000
+
+    clients = new (Client, num = nclients)
+    replicas = new (Replica, num = nreplicas)
+
+    output("client length " , len(clients))
+    output("replica length " , len(replicas))
+
+    no = 1
+
+    for client in clients:
+        setup(client, [no])
+        no = no + 1
+
+    no = 1
+
+    for replica in replicas:
+        setup(replica, [no])
+        no = no + 1
+    
+    start(clients)
+    start(replicas)
