@@ -7,6 +7,6 @@ class Block:
         self.payload = payload
         self.qc = qc
         self.id = id
-        self.children = defaultdict(list)
-        self.parentid = -1
-        
+        self.children = list()
+        #Parent id is redundant. Get from qc.vote info.parent id
+        #Also not needed
