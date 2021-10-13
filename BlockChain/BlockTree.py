@@ -19,19 +19,17 @@ class BlockTree:
             else:
                 # handle the case when commit fails
                 pass
-            self.high_commit_qc = max(self.high_commit_qc, qc.vote_info.round)
-        self.high_qc = max(self.high_qc, qc.vote_info.round)
-        
+            if qc.vote_info.round > self.high_commit_qc.vote_info.round:
+                self.high_commit_qc = qc
+        if qc.vote_info.round > self.high_qc.vote_info.round:
+            self.high_qc = qc
+
     def prune_pending_block_tree(self, node, id):
         #Doesn't work always. Possible that direct children of pending block tree
         #is what we wish to prune to
         #Assume levels of non-TC yet wrong sequence ids, and later the pruning happens
         #Should be dfs till the level where voteinfo.id == parent_id and set that node]
-        if(node.id == id):
-            self.pending_block_tree = node
-            return
-        for child in node.children:
-            self.prune_pending_block_tree(child, id)
+        self.pending_block_tree = self.find_block(node, id)
 
     def execute_and_insert(self, b):
         # need to get previous block id
@@ -51,3 +49,9 @@ class BlockTree:
 
     def generate_block(self, txns, current_round):
         return Block("Block Author 1", current_round, txns, self.high_qc, hash("Author 1" + current_round + txns + self.high_qc.vote_info.id + self.high_qc.signatures))
+
+    def find_block(self, node, id):
+        if(node.id == id):
+            return node
+        for child in node.children:
+            self.find_block(self, child, id)
