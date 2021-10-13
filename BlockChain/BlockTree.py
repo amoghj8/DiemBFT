@@ -39,7 +39,7 @@ class BlockTree:
     def process_vote(self, voteMessage):
         self.process_qc(voteMessage.high_commit_qc)
         vote_idx = hash(voteMessage.ledger_commit_info)
-        self.pending_votes[vote_idx] = self.pending_votes[vote_idx] or voteMessage.signature
+        self.pending_votes[vote_idx] = self.pending_votes[vote_idx].union(voteMessage.signature)
         #Change to proper value of f
         f = 3
         if (len(self.pending_votes[vote_idx]) == 2 * f + 1):
