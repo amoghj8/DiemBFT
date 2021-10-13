@@ -34,7 +34,8 @@ class BlockTree:
     def execute_and_insert(self, b):
         # Sending block as ledger speculate function is expecting block
         Ledger.speculate(b)
-        self.pending_block_tree.children.append(b)
+        parentBlock = self.find_block(b.qc.vote_info.id)
+        parentBlock.children.append(b)
         
     def process_vote(self, voteMessage):
         self.process_qc(voteMessage.high_commit_qc)
