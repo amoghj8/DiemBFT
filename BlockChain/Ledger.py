@@ -12,7 +12,7 @@ class Ledger():
         self.file_name = server_name + "_" + ts + ".json"
         self.file = open(self.file_name, "x")
         self.file.close()
-        self.root = LedgerNode("", -1, -1)
+        self.root = LedgerNode(-1, -1, "")
         self.curr = self.root
         self.pending_blocks = {}
         self.commited_blocks = {}
@@ -83,6 +83,8 @@ class Ledger():
     def write_to_file(self, lst):
         with open(self.file_name, "a") as self.file:
             for val in lst:
+                if val.block_id == -1 and val.parent_id == -1:
+                    continue # genesis Block
                 self.file.write(val.txns + "\n")
                 self.commited_blocks[val.block_id] = self.pending_blocks[val.block_id]
                 del self.pending_blocks[val.block_id]
