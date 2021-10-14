@@ -1,15 +1,22 @@
 import sys
 class Client(process):
-    def setup(client_id : int): pass
+    def setup(client_id : int, replicas : set): pass
 
     def run():
         output("Client Spawned, id = ", self.client_id)
+        send(('Client_Msg', str(client_id) + "test"), to = replicas)
 
 class Replica(process):
-    def setup(replica_id : int): pass
+    def setup(replica_id : int):
+        self.tot_msg = 3
 
     def run():
         output("Replica Spawned, id = ", self.replica_id)
+        await(tot_msg == 0)
+
+    def receive(msg=('Client_Msg', client_msg), from_ = client):
+        output("Client Sent me this message : ", client_msg)
+        tot_msg -= 1
 
 def main():
     nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 3
@@ -25,7 +32,7 @@ def main():
     no = 1
 
     for client in clients:
-        setup(client, [no])
+        setup(client, (no, replicas))
         no = no + 1
 
     no = 1
@@ -34,5 +41,5 @@ def main():
         setup(replica, [no])
         no = no + 1
     
-    start(clients)
     start(replicas)
+    start(clients)
