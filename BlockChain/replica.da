@@ -1,0 +1,28 @@
+import sys
+import random
+import string
+from nacl.signing import SigningKey
+from nacl.signing import SignedMessage
+
+
+#Verifies the signed message and returns the message
+def verify_and_get_signed_message(signed_message : str, verify_key : nacl.signing.VerifyKey):
+    verify_key.verify(signed_message)
+    return signed_message.message.decode('ascii')
+
+class Replica(process):
+    def setup(replica_id : int, verify_key_replica, signing_key_replica, signing_key_list_replica, signing_key_list_client):
+        self.tot_msg = 3
+
+    def run():
+        output("Replica Spawned, id = ", self.replica_id)
+        await(tot_msg == 0)
+
+    def receive(msg=('Client_Msg', client_request_message), from_ = client):
+        client_id = client_request_message.id
+        client_verify_key = signing_key_list_client[client_id]
+
+        client_msg = verify_and_get_signed_message(client_request_message.signed_message, client_verify_key)
+        output("Client", client_id,  "Sent me this message : ", client_msg)
+
+        tot_msg -= 1

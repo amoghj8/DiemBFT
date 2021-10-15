@@ -1,0 +1,30 @@
+import sys
+import random
+import string
+from nacl.signing import SigningKey
+from nacl.signing import SignedMessage
+
+#Sign a message str using a signing key
+def sign_message(message : str, signing_key : nacl.signing.SigningKey):
+    #Encode the message
+    message = message.encode('ascii')
+    #Sign the message and return the signed message
+    return signing_key.sign(message)
+
+class ClientRequestMessage:
+    id : int
+    signed_message : nacl.signing.SignedMessage
+
+    def __init__(self, id, signed_message):
+        self.id = id
+        self.signed_message = signed_message
+
+class Client(process):
+    def setup(client_id, replicas, verify_key, signing_key, signing_key_list_replica):
+        pass
+
+    def run():
+        output("Client Spawned, id = ", self.client_id)
+        signed_msg_to_send = sign_message("test", self.verify_key)
+        client_request_message = ClientRequestMessage(self.client_id, signed_msg_to_send)
+        send(('Client_Msg', client_request_message), to = replicas)
