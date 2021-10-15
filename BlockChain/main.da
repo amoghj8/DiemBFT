@@ -1,22 +1,65 @@
 import sys
+import random
+import string
+from nacl.signing import SigningKey
+from nacl.signing import SignedMessage
+
+class ClientRequestMessage:
+    id : int
+    signed_message : nacl.signing.SignedMessage
+
+    def __init__(self, id, signed_message):
+        self.id = id
+        self.signed_message = signed_message
+
 class Client(process):
-    def setup(client_id : int, replicas : set): pass
+    def setup(client_id, replicas, verify_key, signing_key, signing_key_list_replica):
+        pass
 
     def run():
         output("Client Spawned, id = ", self.client_id)
-        send(('Client_Msg', str(client_id) + "test"), to = replicas)
+        signed_msg_to_send = sign_message("test", self.verify_key)
+        client_request_message = ClientRequestMessage(self.client_id, signed_msg_to_send)
+        send(('Client_Msg', client_request_message), to = replicas)
 
 class Replica(process):
-    def setup(replica_id : int):
+    def setup(replica_id : int, verify_key_replica, signing_key_replica, signing_key_list_replica, signing_key_list_client):
         self.tot_msg = 3
 
     def run():
         output("Replica Spawned, id = ", self.replica_id)
         await(tot_msg == 0)
 
-    def receive(msg=('Client_Msg', client_msg), from_ = client):
-        output("Client Sent me this message : ", client_msg)
+    def receive(msg=('Client_Msg', client_request_message), from_ = client):
+        client_id = client_request_message.id
+        client_verify_key = signing_key_list_client[client_id]
+
+        client_msg = verify_and_get_signed_message(client_request_message.signed_message, client_verify_key)
+        output("Client", client_id,  "Sent me this message : ", client_msg)
+
         tot_msg -= 1
+
+#Returns a list of  public & private keys of length count
+def generate_private_signing_keys(count : int):
+    signing_key_list, verify_key_list = [], []
+    for _ in range(count):
+        sk = SigningKey.generate()
+        pk = sk.verify_key
+        signing_key_list.append(pk)
+        verify_key_list.append(sk)
+    return signing_key_list, verify_key_list
+
+#Sign a message str using a signing key
+def sign_message(message : str, signing_key : nacl.signing.SigningKey):
+    #Encode the message
+    message = message.encode('ascii')
+    #Sign the message and return the signed message
+    return signing_key.sign(message)
+
+#Verifies the signed message and returns the message
+def verify_and_get_signed_message(signed_message : str, verify_key : nacl.signing.VerifyKey):
+    verify_key.verify(signed_message)
+    return signed_message.message.decode('ascii')
 
 def main():
     nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 3
@@ -26,14 +69,19 @@ def main():
     clients = new (Client, num = nclients)
     replicas = new (Replica, num = nreplicas)
 
+    signing_key_list_replica, verify_key_list_replica = generate_private_signing_keys(nreplicas)
+    signing_key_list_client, verify_key_list_client = generate_private_signing_keys(nclients)
+
     output("client length " , len(clients))
     output("replica length " , len(replicas))
 
-    for count, client in enumerate(clients):
-        setup(client, (count, replicas))
+    #def setup(client_id : int, replicas : set, verify_key_client, signing_key_client, signing_key_list_replica): pass
+    for i, client in enumerate(clients):
+        setup(client, (i, replicas, verify_key_list_client[i], signing_key_list_client[i], signing_key_list_replica))
 
-    for count, replica in enumerate(replicas):
-        setup(replica, [count])
+    #def setup(replica_id : int, verify_key_replica, signing_key_replica, signing_key_list_replica, signing_key_list_client):
+    for i, replica in enumerate(replicas):
+        setup(replica, (i, verify_key_list_replica[i], signing_key_list_replica[i], signing_key_list_replica, signing_key_list_client))
     
     start(replicas)
     start(clients)
