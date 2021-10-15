@@ -1,0 +1,39 @@
+import sys
+from nacl.signing import SigningKey
+
+from BlockTree import BlockTree
+from LeaderElection import LeaderElection
+from Pacemaker import Pacemaker
+from Safety import Safety
+
+from QC import QC
+
+from TimeoutMsg import TimeoutMsg
+from ProposalMsg import ProposalMsg
+
+LOCAL_TIMEOUT = "local_timeout"
+PROPOSAL_MESSAGE = "proposal_message"
+VOTE_MESSAGE = "vote_message"
+TIMEOUT_MESSAGE = "timeout_message"
+CLIENT_MESSAGE = "client_message"
+
+class ClientRequestMessage:
+    id : int
+    signed_message : nacl.signing.SignedMessage
+
+    def __init__(self, id, signed_message):
+        self.id = id
+        self.signed_message = signed_message
+
+class Client(process):
+    def setup(client_id, replicas, verify_key, signing_key, verify_key_list_replica):
+        pass
+
+    def send_client_req_msg(msg : str):
+        signed_msg_to_send = sign_message(msg, self.signing_key)
+        client_request_message = ClientRequestMessage(self.client_id, signed_msg_to_send)
+        send((CLIENT_MESSAGE, client_request_message), to = replicas)
+
+    def run():
+        output("Client Spawned, id = ", self.client_id)
+        send_client_req_msg("test")
