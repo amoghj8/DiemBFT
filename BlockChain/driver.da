@@ -1,0 +1,57 @@
+import sys
+from nacl.signing import SigningKey
+
+from BlockTree import BlockTree
+from LeaderElection import LeaderElection
+from Pacemaker import Pacemaker
+from Safety import Safety
+from client import *
+from replica import *
+
+from QC import QC
+
+from TimeoutMsg import TimeoutMsg
+from ProposalMsg import ProposalMsg
+
+LOCAL_TIMEOUT = "local_timeout"
+PROPOSAL_MESSAGE = "proposal_message"
+VOTE_MESSAGE = "vote_message"
+TIMEOUT_MESSAGE = "timeout_message"
+CLIENT_MESSAGE = "client_message"
+
+
+#Returns a list of  signing & verify keys of length count
+def generate_signing_and_verify_keys(count : int):
+    signing_key_list, verify_key_list = [], []
+    for _ in range(count):
+        sk = SigningKey.generate()
+        signing_key_list.append(sk) #Private Key
+        verify_key_list.append(sk.verify_key) #Public Key
+    return signing_key_list, verify_key_list #Private Key, Public Key lists
+
+
+def main():
+    nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 3
+    nreplicas = int(sys.argv[2]) if len(sys.argv) > 2 else 10
+    ngst = 3000
+
+    clients = new(Client, num = nclients)
+    replicas = new(Replica, num = nreplicas)
+
+    signing_key_list_client, verify_key_list_client = generate_signing_and_verify_keys(nclients)
+    signing_key_list_replica, verify_key_list_replica = generate_signing_and_verify_keys(nreplicas)
+    
+    output("client length " , len(clients))
+    output("replica length " , len(replicas))
+
+    #def setup(client_id, replicas, verify_key, signing_key, verify_key_list_replica):
+    #Client will have it's own signing key, verify key and, list of verify keys of replicas
+    for i, client in enumerate(clients):
+        setup(client, (i, replicas, verify_key_list_client[i], signing_key_list_client[i], verify_key_list_replica))
+
+    #def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
+    for i, replica in enumerate(replicas):
+        setup(replica, (i, replicas, verify_key_list_replica[i], signing_key_list_replica[i], verify_key_list_replica, verify_key_list_client))
+    
+    start(replicas)
+    start(clients)

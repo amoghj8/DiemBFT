@@ -1,5 +1,5 @@
 import math
-from BlockChain.Ledger import Ledger
+from Ledger import Ledger
 import random
 from random import sample
 

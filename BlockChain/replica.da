@@ -14,29 +14,9 @@ from ProposalMsg import ProposalMsg
 LOCAL_TIMEOUT = "local_timeout"
 PROPOSAL_MESSAGE = "proposal_message"
 VOTE_MESSAGE = "vote_message"
-TIMEOUT_MESSAGE = "timeout message"
+TIMEOUT_MESSAGE = "timeout_message"
 CLIENT_MESSAGE = "client_message"
 
-class ClientRequestMessage:
-    id : int
-    signed_message : nacl.signing.SignedMessage
-
-    def __init__(self, id, signed_message):
-        self.id = id
-        self.signed_message = signed_message
-
-class Client(process):
-    def setup(client_id, replicas, verify_key, signing_key, verify_key_list_replica):
-        pass
-
-    def send_client_req_msg(msg : str):
-        signed_msg_to_send = sign_message(msg, self.signing_key)
-        client_request_message = ClientRequestMessage(self.client_id, signed_msg_to_send)
-        send((CLIENT_MESSAGE, client_request_message), to = replicas)
-
-    def run():
-        output("Client Spawned, id = ", self.client_id)
-        send_client_req_msg("test")
 
 class Replica(process):
     def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
@@ -61,9 +41,9 @@ class Replica(process):
         output("Replica Spawned, id = ", self.replica_id)
         await(tot_msg == 0)
 
-################################################################################
-            #   MAIN MODULE
-################################################################################
+    ################################################################################
+    #   MAIN MODULE
+    ################################################################################
 
     def process_certificate_qc(qc : QC):
         self.block_tree.process_qc(qc)
@@ -97,6 +77,7 @@ class Replica(process):
     def process_new_round_event():
         pass
 
+    # Todo - local timeout is never recieved from other process - Remove Below code
     #Handler for local timeout
     def receive(msg=(LOCAL_TIMEOUT, local_timeout_message), from_ = replica):
         process_timeout_msg(local_timeout_message)
@@ -110,49 +91,8 @@ class Replica(process):
         output("Client", client_id,  "Sent me this message : ", client_msg)
         tot_msg -= 1
 
-#Returns a list of  signing & verify keys of length count
-def generate_signing_and_verify_keys(count : int):
-    signing_key_list, verify_key_list = [], []
-    for _ in range(count):
-        sk = SigningKey.generate()
-        signing_key_list.append(sk) #Private Key
-        verify_key_list.append(sk.verify_key) #Public Key
-    return signing_key_list, verify_key_list #Private Key, Public Key lists
 
-#Sign a message str using a signing key
-def sign_message(message : str, signing_key : nacl.signing.SigningKey):
-    #Encode the message
-    message = message.encode('ascii')
-    #Sign the message and return the signed message
-    return signing_key.sign(message)
-
-#Verifies the signed message and returns the message
-def verify_and_get_signed_message(signed_message : str, verify_key : nacl.signing.VerifyKey):
-    verify_key.verify(signed_message)
-    return signed_message.message.decode('ascii')
-
-def main():
-    nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 3
-    nreplicas = int(sys.argv[2]) if len(sys.argv) > 2 else 10
-    ngst = 3000
-
-    clients = new(Client, num = nclients)
-    replicas = new(Replica, num = nreplicas)
-
-    signing_key_list_client, verify_key_list_client = generate_signing_and_verify_keys(nclients)
-    signing_key_list_replica, verify_key_list_replica = generate_signing_and_verify_keys(nreplicas)
-    
-    output("client length " , len(clients))
-    output("replica length " , len(replicas))
-
-    #def setup(client_id, replicas, verify_key, signing_key, verify_key_list_replica):
-    #Client will have it's own signing key, verify key and, list of verify keys of replicas
-    for i, client in enumerate(clients):
-        setup(client, (i, replicas, verify_key_list_client[i], signing_key_list_client[i], verify_key_list_replica))
-
-    #def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
-    for i, replica in enumerate(replicas):
-        setup(replica, (i, replicas, verify_key_list_replica[i], signing_key_list_replica[i], verify_key_list_replica, verify_key_list_client))
-    
-    start(replicas)
-    start(clients)
+    #Verifies the signed message and returns the message
+    def verify_and_get_signed_message(signed_message : str, verify_key : nacl.signing.VerifyKey):
+        verify_key.verify(signed_message)
+        return signed_message.message.decode('ascii')
