@@ -1,6 +1,5 @@
 import sys
 from nacl.signing import SigningKey
-from nacl.signing import SignedMessage
 
 from BlockTree import BlockTree
 from LeaderElection import LeaderElection
