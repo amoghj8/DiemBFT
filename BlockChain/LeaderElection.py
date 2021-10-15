@@ -4,7 +4,7 @@ import random
 from random import sample
 
 class LeaderElection:
-    def __init__(self, validators, window_size, exclude_size, reputation_leaders) :
+    def __init__(self, validators, window_size, exclude_size, reputation_leaders):
         self.validators = validators
         self.windowSize = window_size
         self.exclude_size = exclude_size
