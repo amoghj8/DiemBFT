@@ -1,4 +1,5 @@
 import sys
+import nacl.bindings
 from nacl.signing import SigningKey
 
 from BlockTree import BlockTree
@@ -37,3 +38,11 @@ class Client(process):
     def run():
         output("Client Spawned, id = ", self.client_id)
         send_client_req_msg("test")
+
+
+    #Sign a message str using a signing key
+    def sign_message(message : str, signing_key : nacl.signing.SigningKey):
+        #Encode the message
+        message = message.encode('ascii')
+        #Sign the message and return the signed message
+        return signing_key.sign(message)
