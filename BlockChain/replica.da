@@ -14,6 +14,8 @@ from TC import TC
 from TimeoutMsg import TimeoutMsg
 from ProposalMsg import ProposalMsg
 
+import pickle
+
 LOCAL_TIMEOUT = "local_timeout"
 PROPOSAL_MESSAGE = "proposal_message"
 VOTE_MESSAGE = "vote_message"
@@ -67,6 +69,7 @@ class Replica(process):
 
         self.block_tree.execute_and_insert(P.block)
         vote_msg = self.safety.make_vote(P.block, P.last_round_tc)
+        vote_msg = pickle.dumps(vote_msg)
         print("Send Vote Message")
         print(vote_msg)
         if (vote_msg != None):
@@ -87,6 +90,7 @@ class Replica(process):
             self.process_new_round_event(tc)
 
     def process_vote_msg(M: VoteMsg):
+        M = pickle.loads(M)
         qc = self.block_tree.process_vote(M)
         if qc != None:
             print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
