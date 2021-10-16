@@ -5,6 +5,7 @@ from BlockTree import BlockTree
 from LeaderElection import LeaderElection
 from Pacemaker import Pacemaker
 from Safety import Safety
+from Ledger import Ledger
 
 from QC import QC
 
@@ -25,13 +26,14 @@ class Replica(process):
         # def __init__(self, pending_votes, high_qc, high_commit_qc, pending_block_tree):
         # Update with proper values
         # Create Genesis block and set pending_block_tree = Genesis block
-        self.block_tree = BlockTree(10, 10, 10, None)
+        self.ledger = Ledger(self.replica_id)
+        self.block_tree = BlockTree(self.ledger)
 
         #def __init__(self, validators, window_size, exclude_size, reputation_leaders):
         #Update with proper values
         self.leader_election = LeaderElection(replicas, 0, 0, replicas)
 
-        self.pace_maker = Pacemaker()
+        self.pace_maker = Pacemaker(self)
 
         #def __init__(self, private_key, public_keys):
         #We already have private_key(signing key) & public_keys(verify keys)
@@ -40,7 +42,14 @@ class Replica(process):
     def run():
         output("Replica Spawned, id = ", self.replica_id)
         # await(self.tot_msg == 0)
-        await(self.run_done == True) # Also await on process finishing
+        while not self.run_done:
+            self.round_done = False
+            timer_duration = self.pace_maker.get_round_timer()
+            if await(self.round_done == True) : 
+                pass
+            else timeout(timer_duration):
+                self.pace_maker.local_timeout_round()
+
 
     ################################################################################
     #   MAIN MODULE
@@ -95,23 +104,22 @@ class Replica(process):
             proposal_msg_p = ProposalMsg(b, last_tc, self.BlockTree.high_commit_qc)
             send_proposal_msg(proposal_msg_p)
 
-    # Todo - local timeout is never recieved from other process - Remove Below code
-    #Handler for local timeout
-    def receive(msg=(LOCAL_TIMEOUT, local_timeout_message), from_ = replica):
-        process_timeout_msg(local_timeout_message)
-        pass
 
-    def receive(msg=(PROPOSAL_MESSAGE, proposal_message), from_ = replica):
-        process_proposal_msg(proposal_message)
-        pass
+    #Handler for messages from other Replicas
+    def receive(msg=(message_type, message_object), from_ = replica):
+        
+        if message_type == PROPOSAL_MESSAGE:
+            self.process_proposal_msg(message_object)
 
-    def receive(msg=(VOTE_MESSAGE, vote_msg), from_ = replica):
-        process_vote_msg(vote_msg)
-        pass
+        elif message_type == VOTE_MESSAGE:
+            self.process_vote_msg(message_object)
 
-    def receive(msg=(TIMEOUT_MESSAGE, local_timeout_message), from_ = replica):
-        process_timeout_msg(local_timeout_message)
-        pass
+        elif message_type == TIMEOUT_MESSAGE:
+            self.process_timeout_msg(message_object)
+
+        else:
+            output("Message Type Not Recognized")
+
 
     #Handler for client message
     def receive(msg=(msg_type, client_message), from_ = client):
