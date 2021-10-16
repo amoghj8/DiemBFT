@@ -9,7 +9,8 @@ class Ledger():
     def __init__(self, server_name):
         dt = datetime.now()
         ts = datetime.timestamp(dt)
-        self.file_name = server_name + "_" + ts + ".json"
+        self.file_name = str(server_name) + "_" + str(ts) + ".json"
+        # self.file_name = "test.json"
         self.file = open(self.file_name, "x")
         self.file.close()
         self.root = LedgerNode(-1, -1, "")
@@ -114,7 +115,7 @@ class Ledger():
 class LedgerNode:
     def __init__(self, block_id, parent_id, txns = None):
         self.txns = txns
-        self.id = hash(parent_id + txns)
+        self.id = hash(str(parent_id) + str(txns))
         self.parent_id = parent_id
         self.children = []
         self.block_id = block_id

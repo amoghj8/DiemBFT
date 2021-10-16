@@ -1,6 +1,8 @@
-import Block
-import QC
-import Ledger
+from Block import Block
+from QC import QC
+from Ledger import Ledger
+
+from VoteInfo import VoteInfo
 from collections import defaultdict
 
 class BlockTree:
@@ -9,7 +11,9 @@ class BlockTree:
         self.pending_votes = defaultdict(list)
         self.high_qc = None
         self.high_commit_qc = None
-        self.pending_block_tree = Block(None, None, None, None, None)
+        vote_info = VoteInfo("", -2, "", -3, "")
+        qc = QC(vote_info, "", "", "")
+        self.pending_block_tree = Block("", -1, "", qc, "Genesis")
         self.ledger = ledger
 
     def process_qc(self, qc):
@@ -51,7 +55,7 @@ class BlockTree:
         return None
 
     def generate_block(self, txns, current_round):
-        return Block("Block Author 1", current_round, txns, self.high_qc, hash("Author 1" + current_round + txns + self.high_qc.vote_info.id + self.high_qc.signatures))
+        return Block("Block Author 1", current_round, txns, self.high_qc, hash("Author 1" + str(current_round) + str(txns) + str(self.high_qc.vote_info.id) + str(self.high_qc.signatures)))
 
     def find_block(self, node, id):
         if(node.id == id):

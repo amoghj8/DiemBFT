@@ -4,7 +4,6 @@ from nacl.signing import SigningKey
 
 from BlockTree import BlockTree
 from LeaderElection import LeaderElection
-from Pacemaker import Pacemaker
 from Safety import Safety
 
 from QC import QC

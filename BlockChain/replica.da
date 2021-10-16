@@ -1,13 +1,14 @@
 import sys
 from nacl.signing import SigningKey
+from collections import defaultdict
 
 from BlockTree import BlockTree
 from LeaderElection import LeaderElection
-from Pacemaker import Pacemaker
 from Safety import Safety
 from Ledger import Ledger
 
 from QC import QC
+from TC import TC
 
 from TimeoutMsg import TimeoutMsg
 from ProposalMsg import ProposalMsg
@@ -20,14 +21,78 @@ CLIENT_MESSAGE = "client_message"
 CLIENT_FIN_MESSAGE = "client_fin_message"
 
 class Replica(process):
+
+    # set based on the config
+    def PaceMaker_get_round_timer(r = None):
+        delta = 1              # Todo - fetch from config
+        return 4 * delta
+    
+    # Not required
+    def PaceMaker_start_timer(new_round):
+        self.round_done = True  # stop_timer(self.current_round)
+        self.current_round = new_round
+        
+    # Function to be triggered on Timeout
+    def PaceMaker_local_timeout_round():
+        timeout_info = self.safety.make_timeout(self.current_round, self.block_tree.high_qc, self.last_round_tc)
+        # Todo - Send BroadCast message
+
+    def PaceMaker_process_remote_timeout(tmo):
+        tmo_info = tmo.tmo_info
+        if tmo_info.round < self.current_round:
+            return None
+
+        lst_sender = [tmo_v.sender for tmo_v in self.pending_timeouts[tmo_info.round]]
+
+        if tmo_info.sender not in lst_sender:
+            self.pending_timeouts[tmo_info.round].append(tmo_info)
+            lst_sender.append(tmo_info.sender)
+
+        # Todo - read f from config
+        f = 3
+        if len(lst_sender) == f+1:
+            # stop_timer(self.current_round)
+            self.round_done = True # Todo - Not sure if we shld stop timer
+            self.PaceMaker_local_timeout_round()
+
+        lst_high_qc_round = [tmo_v.high_qc for tmo_v in self.pending_timeouts[tmo_info.round]]
+        lst_signature     = [tmo_v.signature for tmo_v in self.pending_timeouts[tmo_info.round]]
+
+        if len(lst_sender) == 2*f+1:
+            return TC(tmo_info.round, lst_high_qc_round, lst_signature)
+            
+        return None
+
+    def PaceMaker_advance_round_tc(tc):
+        if tc == None or tc.round < self.current_round:
+            return False
+        self.last_round_tc = tc
+        self.start_timer(tc.round + 1)
+        return True
+
+    def PaceMaker_advance_round_qc(qc):
+        if qc.vote_info.round < self.current_round:
+            return False
+        self.last_round_tc = None
+        self.PaceMaker_start_timer(qc.vote_info + 1)
+        return True
+
     def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
+
+        # ====== attributes for process end of replica ======
         self.run_done = False
+
+        # ====== attributes for pace maker ======
+        self.current_round = None
+        self.last_round_tc = None
+        self.pending_timeouts = defaultdict(list)
+        # =======================================
 
         # # def __init__(self, pending_votes, high_qc, high_commit_qc, pending_block_tree):
         # # Update with proper values
         # # Create Genesis block and set pending_block_tree = Genesis block
-        # self.ledger = Ledger(self.replica_id)
-        # self.block_tree = BlockTree(self.ledger)
+        self.ledger = Ledger(self.replica_id)
+        self.block_tree = BlockTree(self.ledger)
 
         # #def __init__(self, validators, window_size, exclude_size, reputation_leaders):
         # #Update with proper values
@@ -35,8 +100,6 @@ class Replica(process):
 
         # self.ledger = Ledger(str(self.replica_id))
         # self.block_tree = BlockTree(self.ledger)
-        self.safety = Safety(self.signing_key, verify_key_list_replica)
-        self.pace_maker = Pacemaker(self)
 
         # #def __init__(self, private_key, public_keys):
         # #We already have private_key(signing key) & public_keys(verify keys)
@@ -47,11 +110,11 @@ class Replica(process):
         # await(self.tot_msg == 0)
         while not self.run_done:
             self.round_done = False
-            timer_duration = self.pace_maker.get_round_timer()
+            timer_duration = self.PaceMaker_get_round_timer()
             if await(self.round_done == True) : 
                 pass
             elif timeout(timer_duration):
-                self.pace_maker.local_timeout_round()
+                self.PaceMaker_local_timeout_round()
 
 
     ################################################################################
@@ -61,13 +124,13 @@ class Replica(process):
     def process_certificate_qc(qc : QC):
         self.block_tree.process_qc(qc)
         self.leader_election.update_leaders(qc)
-        self.pace_maker.advance_round_qc(qc.vote_info.round)
+        self.PaceMaker_advance_round_qc(qc.vote_info.round)
 
     def process_proposal_msg(P : ProposalMsg):
         self.process_certificate_qc(P.block.qc)
         self.process_certificate_qc(P.high_commit_qc)
-        self.pace_maker.advance_round_tc(P.last_round_tc)
-        round = self.pace_maker.current_round
+        self.PaceMaker_advance_round_tc(P.last_round_tc)
+        round = self.current_round
         leader = self.leader_election.get_leader(round)
 
         # P.block.round != round V P.sender != leader ∨ P.block.author != leader
@@ -84,10 +147,10 @@ class Replica(process):
     def process_timeout_msg(M : TimeoutMsg):
         self.process_certificate_qc(M.tmo_info.high_qc)
         self.process_certificate_qc(M.high_commit_qc)
-        self.pace_maker.advance_round_tc(M.last_round_tc)
-        tc = self.pace_maker.process_remote_timeout(M)
+        self.PaceMaker_advance_round_tc(M.last_round_tc)
+        tc = self.PaceMaker_process_remote_timeout(M)
         if tc != None:
-            self.pace_maker.advance_round_tc(tc)
+            self.PaceMaker_advance_round_tc(tc)
             self.process_new_round_event(tc)
 
     def process_vote_msg(M: VoteMsg):
@@ -108,10 +171,10 @@ class Replica(process):
         send((PROPOSAL_MESSAGE, signed_msg_to_send), to = self.replicas)
 
     def process_new_round_event(last_tc: TC):
-        u = LeaderElection.get_leader(self.pace_maker.current_round)
+        u = LeaderElection.get_leader(self.current_round)
         if u != None:
             pass
-            # b = self.block_tree.generate_block(MemPool.get_transactions(), self.pace_maker.current_round)
+            # b = self.block_tree.generate_block(MemPool.get_transactions(), self.current_round)
             # proposal_msg_p = ProposalMsg(b, last_tc, self.block_tree.high_commit_qc)
             # self.send_proposal_msg(proposal_msg_p)
 

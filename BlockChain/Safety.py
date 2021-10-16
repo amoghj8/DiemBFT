@@ -53,9 +53,10 @@ class Safety:
             return VoteMsg(vote_info, ledger_commit_info, self.block_tree.high_commit_qc)
         return None
 
-    def make_timeout(round, high_qc, last_tc):
+    def make_timeout(self, round, high_qc, last_tc):
         qc_round = high_qc.vote_info.round
         if self.__safe_to_timeout(round, qc_round, last_tc):
             self.__increase_highest_vote_round(round)
-            return TimeoutInfo(round, high_qc)
+            #To do
+            return TimeoutInfo(round, high_qc, 1, "")
         return None
