@@ -18,7 +18,6 @@ TIMEOUT_MESSAGE = "timeout_message"
 CLIENT_MESSAGE = "client_message"
 CLIENT_FIN_MESSAGE = "client_fin_message"
 
-
 class Replica(process):
     def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
         self.run_done = False
@@ -71,17 +70,46 @@ class Replica(process):
             pass
 
     def process_timeout_msg(M : TimeoutMsg):
-        pass
+        process_certificate_qc(M.tmo_info.high_qc)
+        process_certificate_qc(M.high_commit_qc)
+        self.Pacemaker.advance_round_tc(M.last_round_tc)
+        tc = self.Pacemaker.process_remote_timeout(M)
+        if tc != None:
+            self.Pacemaker.advance_round_tc(tc)
+            process_new_round_event(tc)
 
-    def process_vote_msg():
-        pass
+    def process_vote_msg(M: VoteMsg):
+        qc = self.BlockTree.process_vote(M)
+        if qc != None:
+            process_certificate_qc(qc)
+            process_new_round_event(None)
 
-    def process_new_round_event():
-        pass
+    def send_proposal_msg(msg : str):
+        signed_msg_to_send = sign_message(msg, self.signing_key)
+        send((PROPOSAL_MESSAGE, signed_msg_to_send), to = replicas)
+
+    def process_new_round_event(last_tc: TC):
+        u = LeaderElection.get_leader(self.Pacemaker.current_round)
+        if u != None:
+            b = self.BlockTree.generate_block(MemPool.get_transactions(), self.Pacemaker.current_round)
+            proposal_msg_p = ProposalMsg(b, last_tc, self.BlockTree.high_commit_qc)
+            send_proposal_msg(proposal_msg_p)
 
     # Todo - local timeout is never recieved from other process - Remove Below code
     #Handler for local timeout
     def receive(msg=(LOCAL_TIMEOUT, local_timeout_message), from_ = replica):
+        process_timeout_msg(local_timeout_message)
+        pass
+
+    def receive(msg=(PROPOSAL_MESSAGE, proposal_message), from_ = replica):
+        process_proposal_msg(proposal_message)
+        pass
+
+    def receive(msg=(VOTE_MESSAGE, vote_msg), from_ = replica):
+        process_vote_msg(vote_msg)
+        pass
+
+    def receive(msg=(TIMEOUT_MESSAGE, local_timeout_message), from_ = replica):
         process_timeout_msg(local_timeout_message)
         pass
 
@@ -97,7 +125,6 @@ class Replica(process):
         client_verify_key = verify_key_list_client[client_id]
         client_msg = verify_and_get_signed_message(client_message.signed_message, client_verify_key)
         output("Client", client_id,  "Sent me this message : ", client_msg)
-
 
     #Verifies the signed message and returns the message
     def verify_and_get_signed_message(signed_message : str, verify_key : nacl.signing.VerifyKey):
