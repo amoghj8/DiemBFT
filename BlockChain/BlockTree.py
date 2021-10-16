@@ -1,18 +1,20 @@
 import Block
 import QC
 import Ledger
+from collections import defaultdict
 
 class BlockTree:
     
-    def __init__(self, pending_votes, high_qc, high_commit_qc, pending_block_tree):
-        self.pending_votes = pending_votes
-        self.high_qc = high_qc
-        self.high_commit_qc = high_commit_qc
-        self.pending_block_tree = pending_block_tree
+    def __init__(self, ledger):
+        self.pending_votes = defaultdict(list)
+        self.high_qc = None
+        self.high_commit_qc = None
+        self.pending_block_tree = Block(None, None, None, None, None)
+        self.ledger = ledger
 
     def process_qc(self, qc):
         if qc.ledger_commit_info.commit_state_id is not None:
-            if Ledger.commit(qc.vote_info.parent_id):
+            if self.ledger.commit(qc.vote_info.parent_id):
                 # parent id becomes the new root of the pending block tree
                 # prune the pending Block Tree
                 self.prune_pending_block_tree(self.pending_block_tree, qc.vote_info.parent_id)
@@ -33,7 +35,7 @@ class BlockTree:
 
     def execute_and_insert(self, b):
         # Sending block as ledger speculate function is expecting block
-        Ledger.speculate(b)
+        self.ledger.speculate(b)
         parentBlock = self.find_block(b.qc.vote_info.id)
         parentBlock.children.append(b)
         
