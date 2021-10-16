@@ -2,6 +2,7 @@ from Block import Block
 from LedgerCommitInfo import LedgerCommitInfo
 from QC import QC
 from Ledger import Ledger
+import hashlib
 
 from VoteInfo import VoteInfo
 from collections import defaultdict
@@ -58,7 +59,7 @@ class BlockTree:
         
     def process_vote(self, voteMessage):
         self.process_qc(voteMessage.high_commit_qc)
-        vote_idx = hash(voteMessage.ledger_commit_info)
+        vote_idx = self.hashIt(  str(voteMessage.ledger_commit_info.vote_info_hash) + str(voteMessage.ledger_commit_info.commit_state_id))
         self.pending_votes[vote_idx].append(voteMessage.signature)
         #Change to proper value of f
         f = 0
@@ -68,10 +69,13 @@ class BlockTree:
         return None
 
     def generate_block(self, txns, current_round):
-        return Block("Block Author 1", current_round, txns, self.high_qc, hash("Author 1" + str(current_round) + str(txns) + str(self.high_qc.vote_info.id) + str(self.high_qc.signatures)))
+        return Block("Block Author 1", current_round, txns, self.high_qc, self.hashIt("Author 1" + str(current_round) + str(txns) + str(self.high_qc.vote_info.id) + str(self.high_qc.signatures)))
 
     def find_block(self, node, id):
         if(node.id == id):
             return node
         for child in node.children:
             self.find_block(child, id)
+
+    def hashIt(self, str):
+        return hashlib.sha224(str.encode('ascii')).hexdigest()

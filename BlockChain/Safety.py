@@ -3,6 +3,7 @@ import Ledger
 from VoteInfo import VoteInfo
 from LedgerCommitInfo import LedgerCommitInfo
 from VoteMsg import VoteMsg
+import hashlib
 
 class Safety:
     def __init__(self, private_key, public_keys, ledger = None, block_tree = None):
@@ -34,8 +35,6 @@ class Safety:
         return (self.__consecutive(block_round, qc_round) or self.__safe_to_extend(block_round, qc_round, tc))
 
     def __safe_to_timeout(self, round, qc_round, tc):
-        # print("qc_round = " + qc_round)
-
         if(qc_round < self.__highest_qc_round or round <= max(self.__highest_vote_round - 1, qc_round)):
             return False
         return (self.__consecutive(round, qc_round) or self.__consecutive(round, tc.round))
@@ -63,7 +62,8 @@ class Safety:
             print( "filename = " + str(self.ledger.file_name))
             vote_info = VoteInfo(b.id, b.round, b.qc.vote_info.id, qc_round, self.ledger.pending_state(b.id))
             print("Making Vote")
-            ledger_commit_info = LedgerCommitInfo(self.__commit_state_id_candidate(b.round, b.qc), hash(vote_info))
+            vote_info_hash = self.hashIt( str(b.id) + str(b.round) + str(b.qc.vote_info.id) + str(qc_round) + str(self.ledger.pending_state(b.id)) )
+            ledger_commit_info = LedgerCommitInfo(self.__commit_state_id_candidate(b.round, b.qc), vote_info_hash)
             return VoteMsg(vote_info, ledger_commit_info, self.block_tree.high_commit_qc, 0, "sign") #need to change
         return None
 
@@ -74,3 +74,6 @@ class Safety:
             #To do
             return TimeoutInfo(round, high_qc, 1, "")
         return None
+
+    def hashIt(self, str):
+        return hashlib.sha224(str.encode('ascii')).hexdigest()

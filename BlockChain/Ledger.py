@@ -3,6 +3,7 @@ from datetime import datetime
 import Block
 import QC
 import Ledger
+import hashlib
 
 class Ledger():
     """Ledger Module"""
@@ -89,8 +90,10 @@ class Ledger():
                 if val.block_id == -1 and val.parent_id == -1:
                     continue # genesis Block
                 self.file.write(val.txns + "\n")
-                self.commited_blocks[val.block_id] = self.pending_blocks[val.block_id]
-                del self.pending_blocks[val.block_id]
+
+                if val.block_id in self.pending_blocks:
+                    self.commited_blocks[val.block_id] = self.pending_blocks[val.block_id]
+                    del self.pending_blocks[val.block_id]
 
     
     """
@@ -117,7 +120,10 @@ class Ledger():
 class LedgerNode:
     def __init__(self, block_id, parent_id, txns = None):
         self.txns = txns
-        self.id = hash(str(parent_id) + str(txns))
+        self.id = self.hashIt(str(parent_id) + str(txns))
         self.parent_id = parent_id
         self.children = []
         self.block_id = block_id
+
+    def hashIt(self, str):
+        return hashlib.sha224(str.encode('ascii')).hexdigest()
