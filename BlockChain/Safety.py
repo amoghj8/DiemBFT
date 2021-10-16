@@ -24,13 +24,14 @@ class Safety:
         return (round + 1 == block_round)
 
     def __safe_to_extend(self, block_round, qc_round, tc):
-        return (self.__consecutive(block_round) and qc_round >= max(tc.tmo_high_qc_rounds))
+        lst_high_qc_val = [ qc_obj.vote_info.round for qc_obj in tc.tmo_high_qc_rounds ]
+        return (self.__consecutive(block_round, tc.round) and qc_round >= max(lst_high_qc_val))
 
     def __safe_to_vote(self, block_round, qc_round, tc):
         if block_round <= max(self.__highest_vote_round, qc_round):
             print("No.......")
             return False
-        return (self.__consecutive(block_round, qc_round) and qc_round >= max(tc.tmo_high_qc_rounds))
+        return (self.__consecutive(block_round, qc_round) or self.__safe_to_extend(block_round, qc_round, tc))
 
     def __safe_to_timeout(self, round, qc_round, tc):
         # print("qc_round = " + qc_round)
@@ -50,6 +51,7 @@ class Safety:
     def make_vote(self, b, last_tc):
         qc_round = b.qc.vote_info.round
         print("Make Vote")
+        # print(last_tc.tmo_high_qc_rounds)
         if self.__safe_to_vote(b.round, qc_round, last_tc):
             print("Making Vote")
             self.__update_highest_qc_round(qc_round)
