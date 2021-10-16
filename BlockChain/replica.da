@@ -23,21 +23,21 @@ class Replica(process):
     def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
         self.run_done = False
 
-        # def __init__(self, pending_votes, high_qc, high_commit_qc, pending_block_tree):
-        # Update with proper values
-        # Create Genesis block and set pending_block_tree = Genesis block
-        self.ledger = Ledger(self.replica_id)
-        self.block_tree = BlockTree(self.ledger)
+        # # def __init__(self, pending_votes, high_qc, high_commit_qc, pending_block_tree):
+        # # Update with proper values
+        # # Create Genesis block and set pending_block_tree = Genesis block
+        # self.ledger = Ledger(self.replica_id)
+        # self.block_tree = BlockTree(self.ledger)
 
-        #def __init__(self, validators, window_size, exclude_size, reputation_leaders):
-        #Update with proper values
-        self.leader_election = LeaderElection(replicas, 0, 0, replicas)
+        # #def __init__(self, validators, window_size, exclude_size, reputation_leaders):
+        # #Update with proper values
+        # self.leader_election = LeaderElection(replicas, 0, 0, replicas)
 
         self.pace_maker = Pacemaker(self)
 
-        #def __init__(self, private_key, public_keys):
-        #We already have private_key(signing key) & public_keys(verify keys)
-        self.safety = Safety(self.signing_key, verify_key_list_replica)
+        # #def __init__(self, private_key, public_keys):
+        # #We already have private_key(signing key) & public_keys(verify keys)
+        # self.safety = Safety(self.signing_key, verify_key_list_replica)
 
     def run():
         output("Replica Spawned, id = ", self.replica_id)
@@ -47,7 +47,7 @@ class Replica(process):
             timer_duration = self.pace_maker.get_round_timer()
             if await(self.round_done == True) : 
                 pass
-            else timeout(timer_duration):
+            elif timeout(timer_duration):
                 self.pace_maker.local_timeout_round()
 
 
@@ -55,12 +55,12 @@ class Replica(process):
     #   MAIN MODULE
     ################################################################################
 
-    def process_certificate_qc(self, qc : QC):
+    def process_certificate_qc(qc : QC):
         self.block_tree.process_qc(qc)
         self.leader_election.update_leaders(qc)
         self.pace_maker.advance_round_qc(qc.vote_info.round)
 
-    def process_proposal_msg(self, P : ProposalMsg):
+    def process_proposal_msg(P : ProposalMsg):
         self.process_certificate_qc(P.block.qc)
         self.process_certificate_qc(P.high_commit_qc)
         self.pace_maker.advance_round_tc(P.last_round_tc)
@@ -78,7 +78,7 @@ class Replica(process):
             #send vote msg to LeaderElection.get leader(current round+ 1)
             pass
 
-    def process_timeout_msg(self, M : TimeoutMsg):
+    def process_timeout_msg(M : TimeoutMsg):
         self.process_certificate_qc(M.tmo_info.high_qc)
         self.process_certificate_qc(M.high_commit_qc)
         self.pace_maker.advance_round_tc(M.last_round_tc)
@@ -87,7 +87,7 @@ class Replica(process):
             self.pace_maker.advance_round_tc(tc)
             self.process_new_round_event(tc)
 
-    def process_vote_msg(self, M: VoteMsg):
+    def process_vote_msg(M: VoteMsg):
         qc = self.block_tree.process_vote(M)
         if qc != None:
             self.process_certificate_qc(qc)
@@ -100,16 +100,17 @@ class Replica(process):
         #Sign the message and return the signed message
         return signing_key.sign(message)
 
-    def send_proposal_msg(self, msg : str):
+    def send_proposal_msg(msg : str):
         signed_msg_to_send = self.sign_message(msg, self.signing_key)
         send((PROPOSAL_MESSAGE, signed_msg_to_send), to = self.replicas)
 
-    def process_new_round_event(self, last_tc: TC):
+    def process_new_round_event(last_tc: TC):
         u = LeaderElection.get_leader(self.pace_maker.current_round)
         if u != None:
-            b = self.block_tree.generate_block(MemPool.get_transactions(), self.pace_maker.current_round)
-            proposal_msg_p = ProposalMsg(b, last_tc, self.block_tree.high_commit_qc)
-            self.send_proposal_msg(proposal_msg_p)
+            pass
+            # b = self.block_tree.generate_block(MemPool.get_transactions(), self.pace_maker.current_round)
+            # proposal_msg_p = ProposalMsg(b, last_tc, self.block_tree.high_commit_qc)
+            # self.send_proposal_msg(proposal_msg_p)
 
 
     #Handler for messages from other Replicas

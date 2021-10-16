@@ -15,8 +15,8 @@ class Pacemaker:
         self.replica = replica
 
     # set based on the config
-    def get_round_timer(self, r):
-        delta = 5              # Todo - fetch from config
+    def get_round_timer(self, r = None):
+        delta = 1              # Todo - fetch from config
         return 4 * delta
 
     
