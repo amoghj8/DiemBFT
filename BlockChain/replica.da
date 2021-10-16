@@ -72,14 +72,14 @@ class Replica(process):
     def process_timeout_msg(M : TimeoutMsg):
         process_certificate_qc(M.tmo_info.high_qc)
         process_certificate_qc(M.high_commit_qc)
-        Pacemaker.advance_round_tc(M.last_round_tc)
-        tc = Pacemaker.process_remote_timeout(M)
+        self.Pacemaker.advance_round_tc(M.last_round_tc)
+        tc = self.Pacemaker.process_remote_timeout(M)
         if tc != None:
-            Pacemaker.advance_round_tc(tc)
+            self.Pacemaker.advance_round_tc(tc)
             process_new_round_event(tc)
 
     def process_vote_msg(M: VoteMsg):
-        qc = BlockTree.process_vote(M)
+        qc = self.BlockTree.process_vote(M)
         if qc != None:
             process_certificate_qc(qc)
             process_new_round_event(None)
@@ -89,10 +89,10 @@ class Replica(process):
         send((PROPOSAL_MESSAGE, signed_msg_to_send), to = replicas)
 
     def process_new_round_event(last_tc: TC):
-        u = LeaderElection.get_leader(Pacemaker.current_round)
+        u = LeaderElection.get_leader(self.Pacemaker.current_round)
         if u != None:
-            b = BlockTree.generate_block(MemPool.get_transactions(), Pacemaker.current_round)
-            proposal_msg_p = ProposalMsg(b, last_tc, BlockTree.high_commit_qc)
+            b = self.BlockTree.generate_block(MemPool.get_transactions(), self.Pacemaker.current_round)
+            proposal_msg_p = ProposalMsg(b, last_tc, self.BlockTree.high_commit_qc)
             send_proposal_msg(proposal_msg_p)
 
     # Todo - local timeout is never recieved from other process - Remove Below code
