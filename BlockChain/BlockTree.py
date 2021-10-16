@@ -1,4 +1,5 @@
 from Block import Block
+from LedgerCommitInfo import LedgerCommitInfo
 from QC import QC
 from Ledger import Ledger
 
@@ -9,12 +10,20 @@ class BlockTree:
     
     def __init__(self, ledger):
         self.pending_votes = defaultdict(list)
-        vote_info = VoteInfo("", -2, "", -3, "")
-        qc = QC(vote_info, "", "", "")
+        ledger_commit_info = LedgerCommitInfo("state_id", "hash")
+
+        #VoteInfo and QC of Parent of Genesis
+        vote_info = VoteInfo("Genesis-1", -2, "Genesis-2", -3, "")
+        qc = QC(vote_info, "", "", "", ledger_commit_info)
+
+        #VoteInfo and QC of Genesis Block
         self.pending_block_tree = Block("", -1, "", qc, "Genesis")
-        self.high_qc = qc
-        self.high_commit_qc = qc
+        vote_info_1 = VoteInfo("Genesis", -1, "Genesis-1", -2, "")
+        self.high_qc = QC(vote_info_1, "", "", "", ledger_commit_info)
+        self.high_commit_qc = self.high_qc
+
         self.ledger = ledger
+        self.current_round = 0
 
     def process_qc(self, qc):
         if qc.ledger_commit_info.commit_state_id is not None:
@@ -39,8 +48,12 @@ class BlockTree:
 
     def execute_and_insert(self, b):
         # Sending block as ledger speculate function is expecting block
+        # print("current round = " + str(self.current_round))
         self.ledger.speculate(b)
-        parentBlock = self.find_block(b.qc.vote_info.id)
+        parentBlock = self.find_block(self.pending_block_tree, b.qc.vote_info.id)
+        if(parentBlock is None):
+            parentBlock = self.pending_block_tree
+        print("Current id = [" + str(b.id) + "] search pid = [" + str(b.qc.vote_info.id) + "] Parent Id = " + str(parentBlock.id))
         parentBlock.children.append(b)
         
     def process_vote(self, voteMessage):
@@ -48,7 +61,7 @@ class BlockTree:
         vote_idx = hash(voteMessage.ledger_commit_info)
         self.pending_votes[vote_idx] = self.pending_votes[vote_idx].union(voteMessage.signature)
         #Change to proper value of f
-        f = 1
+        f = 0
         if (len(self.pending_votes[vote_idx]) == 2 * f + 1):
             qc = QC(voteMessage.vote_info, self.pending_votes[vote_idx], "Author 1", "Signature 1")
             return qc
@@ -61,4 +74,4 @@ class BlockTree:
         if(node.id == id):
             return node
         for child in node.children:
-            self.find_block(self, child, id)
+            self.find_block(child, id)

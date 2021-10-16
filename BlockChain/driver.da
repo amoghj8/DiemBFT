@@ -52,7 +52,7 @@ def main():
     #def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
     for i, replica in enumerate(replicas):
         output("######################")
-        setup(replica, (i, replicas, verify_key_list_replica[i], signing_key_list_replica[i], verify_key_list_replica, verify_key_list_client))
+        setup(replica, (i, replicas, verify_key_list_replica[i], signing_key_list_replica[i], verify_key_list_replica, verify_key_list_client, clients))
     
     start(replicas)
     start(clients)

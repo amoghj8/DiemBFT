@@ -23,7 +23,7 @@ class Ledger():
     Add the block to the Speculative Ledger Branch and return the new Ledger State
     """
     def speculate(self, blk):
-        prev_block_id = blk.qc.block_id
+        prev_block_id = blk.qc.vote_info.id
         block_id = blk.id
         txns = blk.payload
         curr_node = self.root
@@ -62,7 +62,8 @@ class Ledger():
     Returns The Block that was recently commited
     """
     def committed_block(self, block_id):
-        return self.commited_blocks[block_id] if self.commited_blocks.has_key(block_id) else None
+        return self.commited_blocks[block_id] if block_id in self.commited_blocks else None
+        # return self.commited_blocks[block_id] if self.commited_blocks.has_key(block_id) else None
 
     
     """
