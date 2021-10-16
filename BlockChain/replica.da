@@ -1,3 +1,4 @@
+import collections
 import sys
 from nacl.signing import SigningKey
 from collections import defaultdict
@@ -35,7 +36,18 @@ class Replica(process):
     # Function to be triggered on Timeout
     def PaceMaker_local_timeout_round():
         timeout_info = self.safety.make_timeout(self.current_round, self.block_tree.high_qc, self.last_round_tc)
+        print("Send TC here")
+        if(current_round == 0):
+            #Send TC Anyway
+            pass
+        tmoMsg = TimeoutMsg(timeout_info, self.last_round_tc, self.block_tree.high_commit_qc)
+        send((TIMEOUT_MESSAGE, tmoMsg), to = replicas)
         # Todo - Send BroadCast message
+
+    # def send_broadcast_message(message_type : str, message_obj):
+    #     signed_msg_to_send = sign_message(msg, self.signing_key)
+    #     client_message = ClientMessage(self.client_id, type, signed_msg_to_send)
+    #     send((type, client_message), to = replicas)
 
     def PaceMaker_process_remote_timeout(tmo):
         tmo_info = tmo.tmo_info
@@ -49,7 +61,7 @@ class Replica(process):
             lst_sender.append(tmo_info.sender)
 
         # Todo - read f from config
-        f = 3
+        f = 1
         if len(lst_sender) == f+1:
             # stop_timer(self.current_round)
             self.round_done = True # Todo - Not sure if we shld stop timer
@@ -83,9 +95,14 @@ class Replica(process):
         self.run_done = False
 
         # ====== attributes for pace maker ======
-        self.current_round = None
+        self.current_round = 0
         self.last_round_tc = None
         self.pending_timeouts = defaultdict(list)
+        # =======================================
+
+
+        # ====== attributes for Mempool ======
+        self.mempool = collections.deque()
         # =======================================
 
         # # def __init__(self, pending_votes, high_qc, high_commit_qc, pending_block_tree):
@@ -114,6 +131,7 @@ class Replica(process):
             if await(self.round_done == True) : 
                 pass
             elif timeout(timer_duration):
+                print("Timeout Triggered")
                 self.PaceMaker_local_timeout_round()
 
 
@@ -173,10 +191,10 @@ class Replica(process):
     def process_new_round_event(last_tc: TC):
         u = LeaderElection.get_leader(self.current_round)
         if u != None:
-            pass
-            # b = self.block_tree.generate_block(MemPool.get_transactions(), self.current_round)
-            # proposal_msg_p = ProposalMsg(b, last_tc, self.block_tree.high_commit_qc)
-            # self.send_proposal_msg(proposal_msg_p)
+            # pass
+            b = self.block_tree.generate_block(self.mempool.popleft(), self.current_round)
+            proposal_msg_p = ProposalMsg(b, last_tc, self.block_tree.high_commit_qc)
+            self.send_proposal_msg(proposal_msg_p)
 
 
     #Handler for messages from other Replicas
@@ -198,6 +216,7 @@ class Replica(process):
     #Handler for client message
     def receive(msg=(msg_type, client_message), from_ = client):
         if(msg_type == CLIENT_FIN_MESSAGE):
+            print(self.mempool)
             self.run_done = True
             return
         
@@ -207,6 +226,7 @@ class Replica(process):
         client_verify_key = verify_key_list_client[client_id]
         client_msg = verify_and_get_signed_message(client_message.signed_message, client_verify_key)
         output("Client", client_id,  "Sent me this message : ", client_msg)
+        self.mempool.append(client_msg)
 
     #Verifies the signed message and returns the message
     def verify_and_get_signed_message(signed_message : str, verify_key : nacl.signing.VerifyKey):
