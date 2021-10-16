@@ -47,10 +47,12 @@ def main():
     #def setup(client_id, replicas, verify_key, signing_key, verify_key_list_replica):
     #Client will have it's own signing key, verify key and, list of verify keys of replicas
     for i, client in enumerate(clients):
+        output("**********************")
         setup(client, (i, replicas, verify_key_list_client[i], signing_key_list_client[i], verify_key_list_replica))
 
     #def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
     for i, replica in enumerate(replicas):
+        output("######################")
         setup(replica, (i, replicas, verify_key_list_replica[i], signing_key_list_replica[i], verify_key_list_replica, verify_key_list_client))
     
     start(replicas)
