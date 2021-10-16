@@ -39,11 +39,11 @@ class Client(process):
 
     def run():
         output("Client Spawned, id = ", self.client_id)
-        send_client_req_msg("test1", CLIENT_MESSAGE)
-        send_client_req_msg("test2", CLIENT_MESSAGE)
-        send_client_req_msg("test3", CLIENT_MESSAGE)
-        send_client_req_msg("test4", CLIENT_MESSAGE)
-        # send_client_req_msg("Finish", CLIENT_FIN_MESSAGE)
+        send_client_req_msg("test1" + str(self.client_id), CLIENT_MESSAGE)
+        send_client_req_msg("test2" + str(self.client_id), CLIENT_MESSAGE)
+        send_client_req_msg("test3" + str(self.client_id), CLIENT_MESSAGE)
+        send_client_req_msg("test4" + str(self.client_id), CLIENT_MESSAGE)
+        send_client_req_msg("Finish", CLIENT_FIN_MESSAGE)
 
 
     #Sign a message str using a signing key

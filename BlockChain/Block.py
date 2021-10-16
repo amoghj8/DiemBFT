@@ -1,7 +1,9 @@
 from collections import defaultdict
 
+from QC import QC
+
 class Block:
-    def __init__(self, author, round, payload, qc, id):
+    def __init__(self, author : int, round : int, payload : str, qc : QC, id : str):
         self.author = author
         self.round = round
         self.payload = payload

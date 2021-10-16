@@ -7,27 +7,41 @@ from collections import defaultdict
 
 class BlockTree:
     
-    def __init__(self, ledger):
+    def __init__(self, ledger, public_key_list_replica):
         self.pending_votes = defaultdict(list)
-        vote_info = VoteInfo("", -2, "", -3, "")
-        qc = QC(vote_info, "", "", "")
-        self.pending_block_tree = Block("", -1, "", qc, "Genesis")
-        self.high_qc = qc
-        self.high_commit_qc = qc
+
+        #Create a genesis block and set it to pending block tree
+        #Vote info for genesis block
+        #id = None
+        #round = 0
+        #parent_id = None
+        #parent_round = -1
+        #exec_state_id = None
+        vote_info_for_genesis = VoteInfo("idGenesis", 0, None, -1, None)
+
+        #Make a QC for the Genesis block
+        #Let author for Genesis block QC be 0 and 0 is assumed to be the leader
+        #Every block b (except for a known genesis block P0) is chained to a parent via b.qc,
+        # a Quorum Certiﬁcate (QC) that consists of a quorum of votes for the parent block
+        self.pending_block_tree = Block(0, 0, "", None, "idGenesis")
+        self.high_qc = QC(vote_info_for_genesis, public_key_list_replica, 0, public_key_list_replica[0])
+        self.high_commit_qc = None
         self.ledger = ledger
 
     def process_qc(self, qc):
-        if qc.ledger_commit_info.commit_state_id is not None:
-            if self.ledger.commit(qc.vote_info.parent_id):
-                # parent id becomes the new root of the pending block tree
-                # prune the pending Block Tree
+        if qc is not None and qc.ledger_commit_info is not None:
+            if qc.ledger_commit_info.commit_state_id is not None:
+                print("qc.vote_info.parent_id", qc.vote_info.parent_id)
+                self.ledger.commit(qc.vote_info.parent_id)
+                    # parent id becomes the new root of the pending block tree
+                    # prune the pending Block Tree
                 self.prune_pending_block_tree(self.pending_block_tree, qc.vote_info.parent_id)
-            else:
-                # handle the case when commit fails
-                pass
-            if qc.vote_info.round > self.high_commit_qc.vote_info.round:
-                self.high_commit_qc = qc
-        if qc.vote_info.round > self.high_qc.vote_info.round:
+                # else:
+                #     # handle the case when commit fails
+                #     pass
+                if self.high_commit_qc is None or (qc.vote_info.round > self.high_commit_qc.vote_info.round):
+                    self.high_commit_qc = qc
+        if qc is not None and qc.vote_info is not None and qc.vote_info.round > self.high_qc.vote_info.round:
             self.high_qc = qc
 
     def prune_pending_block_tree(self, node, id):
@@ -40,25 +54,29 @@ class BlockTree:
     def execute_and_insert(self, b):
         # Sending block as ledger speculate function is expecting block
         self.ledger.speculate(b)
-        parentBlock = self.find_block(b.qc.vote_info.id)
+        parentBlock = self.find_block(self.pending_block_tree, b.qc.vote_info.id)
+        print("sample", b.qc.vote_info.id, " ", parentBlock.id)
         parentBlock.children.append(b)
         
-    def process_vote(self, voteMessage):
+    def process_vote(self, voteMessage, author, signature):
         self.process_qc(voteMessage.high_commit_qc)
-        vote_idx = hash(voteMessage.ledger_commit_info)
-        self.pending_votes[vote_idx] = self.pending_votes[vote_idx].union(voteMessage.signature)
+        vote_idx = voteMessage.ledger_commit_info.get_hash()
+        self.pending_votes[vote_idx].append(voteMessage.signature)
         #Change to proper value of f
         f = 1
         if (len(self.pending_votes[vote_idx]) == 2 * f + 1):
-            qc = QC(voteMessage.vote_info, self.pending_votes[vote_idx], "Author 1", "Signature 1")
+            qc = QC(voteMessage.vote_info, self.pending_votes[vote_idx], author, signature, voteMessage.ledger_commit_info)
+            print("QC Also obtained")
             return qc
         return None
 
-    def generate_block(self, txns, current_round):
-        return Block("Block Author 1", current_round, txns, self.high_qc, hash("Author 1" + str(current_round) + str(txns) + str(self.high_qc.vote_info.id) + str(self.high_qc.signatures)))
+    def generate_block(self, u, current_round, txns, id):
+        return Block(u, current_round, txns, self.high_qc, id)
 
-    def find_block(self, node, id):
-        if(node.id == id):
-            return node
-        for child in node.children:
-            self.find_block(self, child, id)
+    def find_block(self, block, id):
+        if block is not None:
+            if(block.id == id):
+                return block
+            for child in block.children:
+                return self.find_block(child, id)
+        return None
