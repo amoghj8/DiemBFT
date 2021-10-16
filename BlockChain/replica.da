@@ -55,14 +55,14 @@ class Replica(process):
     #   MAIN MODULE
     ################################################################################
 
-    def process_certificate_qc(qc : QC):
+    def process_certificate_qc(self, qc : QC):
         self.block_tree.process_qc(qc)
         self.leader_election.update_leaders(qc)
         self.pace_maker.advance_round_qc(qc.vote_info.round)
 
-    def process_proposal_msg(P : ProposalMsg):
-        process_certificate_qc(P.block.qc)
-        process_certificate_qc(P.high_commit_qc)
+    def process_proposal_msg(self, P : ProposalMsg):
+        self.process_certificate_qc(P.block.qc)
+        self.process_certificate_qc(P.high_commit_qc)
         self.pace_maker.advance_round_tc(P.last_round_tc)
         round = self.pace_maker.current_round
         leader = self.leader_election.get_leader(round)
@@ -78,31 +78,38 @@ class Replica(process):
             #send vote msg to LeaderElection.get leader(current round+ 1)
             pass
 
-    def process_timeout_msg(M : TimeoutMsg):
-        process_certificate_qc(M.tmo_info.high_qc)
-        process_certificate_qc(M.high_commit_qc)
-        self.Pacemaker.advance_round_tc(M.last_round_tc)
-        tc = self.Pacemaker.process_remote_timeout(M)
+    def process_timeout_msg(self, M : TimeoutMsg):
+        self.process_certificate_qc(M.tmo_info.high_qc)
+        self.process_certificate_qc(M.high_commit_qc)
+        self.pace_maker.advance_round_tc(M.last_round_tc)
+        tc = self.pace_maker.process_remote_timeout(M)
         if tc != None:
-            self.Pacemaker.advance_round_tc(tc)
-            process_new_round_event(tc)
+            self.pace_maker.advance_round_tc(tc)
+            self.process_new_round_event(tc)
 
-    def process_vote_msg(M: VoteMsg):
-        qc = self.BlockTree.process_vote(M)
+    def process_vote_msg(self, M: VoteMsg):
+        qc = self.block_tree.process_vote(M)
         if qc != None:
-            process_certificate_qc(qc)
-            process_new_round_event(None)
+            self.process_certificate_qc(qc)
+            self.process_new_round_event(None)
 
-    def send_proposal_msg(msg : str):
-        signed_msg_to_send = sign_message(msg, self.signing_key)
-        send((PROPOSAL_MESSAGE, signed_msg_to_send), to = replicas)
+    #Sign a message str using a signing key
+    def sign_message(message : str, signing_key : nacl.signing.SigningKey):
+        #Encode the message
+        message = message.encode('ascii')
+        #Sign the message and return the signed message
+        return signing_key.sign(message)
 
-    def process_new_round_event(last_tc: TC):
-        u = LeaderElection.get_leader(self.Pacemaker.current_round)
+    def send_proposal_msg(self, msg : str):
+        signed_msg_to_send = self.sign_message(msg, self.signing_key)
+        send((PROPOSAL_MESSAGE, signed_msg_to_send), to = self.replicas)
+
+    def process_new_round_event(self, last_tc: TC):
+        u = LeaderElection.get_leader(self.pace_maker.current_round)
         if u != None:
-            b = self.BlockTree.generate_block(MemPool.get_transactions(), self.Pacemaker.current_round)
-            proposal_msg_p = ProposalMsg(b, last_tc, self.BlockTree.high_commit_qc)
-            send_proposal_msg(proposal_msg_p)
+            b = self.block_tree.generate_block(MemPool.get_transactions(), self.pace_maker.current_round)
+            proposal_msg_p = ProposalMsg(b, last_tc, self.block_tree.high_commit_qc)
+            self.send_proposal_msg(proposal_msg_p)
 
 
     #Handler for messages from other Replicas
