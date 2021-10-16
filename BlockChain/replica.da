@@ -32,7 +32,7 @@ class Replica(process):
         self.ledger = Ledger(self.replica_id)
         self.block_tree = BlockTree(self.ledger)
         self.leader_election = LeaderElection(replicas, 3, 3, replicas, self.ledger, self.block_tree)
-        self.safety = Safety(self.signing_key, verify_key_list_replica)
+        self.safety = Safety(self.signing_key, verify_key_list_replica, self.ledger, self.block_tree)
 
     def run():
         output("Replica Spawned, id = ", self.replica_id)
@@ -70,10 +70,11 @@ class Replica(process):
         print("Send Vote Message")
         print(vote_msg)
         if (vote_msg != None):
-            print("Sending Vote Message")
             #send vote msg to LeaderElection.get leader(current round+ 1)
-            next_leader = self.leader_election(self.block_tree.current_round+1)
-            send((VOTE_MESSAGE, vote_msg), to = next_leader)
+            next_leader = self.leader_election.get_leader(self.block_tree.current_round+1)
+            print("Sending Vote Message")
+            send((VOTE_MESSAGE, vote_msg), to = self.replicas)   # Fix - Need to send to only Next leader
+            print("Sent Vote Message")
             pass
 
     def process_timeout_msg(M : TimeoutMsg):
@@ -88,8 +89,11 @@ class Replica(process):
     def process_vote_msg(M: VoteMsg):
         qc = self.block_tree.process_vote(M)
         if qc != None:
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
             self.process_certificate_qc(qc)
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
             self.process_new_round_event(None)
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
     #Sign a message str using a signing key
     def sign_message(message : str, signing_key : nacl.signing.SigningKey):
@@ -118,6 +122,7 @@ class Replica(process):
             self.process_proposal_msg(message_object)
 
         elif message_type == VOTE_MESSAGE:
+            print("********************Got Vote Message*****************************")
             self.process_vote_msg(message_object)
 
         elif message_type == TIMEOUT_MESSAGE:
@@ -208,5 +213,5 @@ class Replica(process):
         if qc.vote_info.round < self.block_tree.current_round:
             return False
         self.last_round_tc = None
-        self.PaceMaker_start_timer(qc.vote_info + 1)
+        self.PaceMaker_start_timer(qc.vote_info.round + 1)
         return True

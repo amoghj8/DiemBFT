@@ -45,6 +45,7 @@ class Ledger():
     Return the Ledger State of the associated Block Id
     """
     def pending_state(self, block_id):
+        print("Searching for Block Id = " + str(block_id))
         return self.getLedgerNode(block_id, self.root).id
 
     

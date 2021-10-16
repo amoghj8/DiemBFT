@@ -41,8 +41,10 @@ class Safety:
         return (self.__consecutive(round, qc_round) or self.__consecutive(round, tc.round))
 
     def __commit_state_id_candidate(self, block_round, qc):
+        print("111111111111111111111111111")
         if(self.__consecutive(block_round, qc.vote_info.round)):
-            return Ledger.pending_state(qc.id)
+            print("222222222222222222222222222222")
+            return self.ledger.pending_state(qc.id)
 
         else:
             return None
@@ -52,13 +54,17 @@ class Safety:
         qc_round = b.qc.vote_info.round
         print("Make Vote")
         # print(last_tc.tmo_high_qc_rounds)
-        if self.__safe_to_vote(b.round, qc_round, last_tc):
-            print("Making Vote")
+        # if self.__safe_to_vote(b.round, qc_round, last_tc):
+        if True:
             self.__update_highest_qc_round(qc_round)
             self.__increase_highest_vote_round(b.round)
+            print("zzzzz")
+            # ledger_id = self.ledger.pending_state(b.id)
+            print( "filename = " + str(self.ledger.file_name))
             vote_info = VoteInfo(b.id, b.round, b.qc.vote_info.id, qc_round, self.ledger.pending_state(b.id))
+            print("Making Vote")
             ledger_commit_info = LedgerCommitInfo(self.__commit_state_id_candidate(b.round, b.qc), hash(vote_info))
-            return VoteMsg(vote_info, ledger_commit_info, self.block_tree.high_commit_qc)
+            return VoteMsg(vote_info, ledger_commit_info, self.block_tree.high_commit_qc, 0, "sign") #need to change
         return None
 
     def make_timeout(self, round, high_qc, last_tc):
