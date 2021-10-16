@@ -46,10 +46,11 @@ class Replica(process):
         send((TIMEOUT_MESSAGE, tmoMsg), to = replicas)
         # Todo - Send BroadCast message
 
-    # def send_broadcast_message(message_type : str, message_obj):
-    #     signed_msg_to_send = sign_message(msg, self.signing_key)
-    #     client_message = ClientMessage(self.client_id, type, signed_msg_to_send)
-    #     send((type, client_message), to = replicas)
+    def send_broadcast_message(message_type : str, message_obj):
+        msg = pickle.dumps(message_obj)
+        signed_msg_to_send = sign_message(msg, self.signing_key)
+        client_message = ClientMessage(self.client_id, type, signed_msg_to_send)
+        send((type, client_message), to = replicas)
 
     def PaceMaker_process_remote_timeout(tmo):
         tmo_info = tmo.tmo_info
@@ -200,10 +201,8 @@ class Replica(process):
 
 
     #Handler for messages from other Replicas
-    def receive(msg=(message_type, message_object), from_ = replica):
-        
-        searlizedObject = pickle.dumps(message_object)
-        
+    def receive(msg=(message_type, message_object), from_ = replica): 
+        deSearlizedMessage = pickle.loads(message_object)
         if message_type == PROPOSAL_MESSAGE:
             self.process_proposal_msg(message_object)
 
