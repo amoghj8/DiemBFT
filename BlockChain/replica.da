@@ -114,7 +114,8 @@ class Replica(process):
         u = self.leader_election.get_leader(self.block_tree.current_round)
         if u != None:
             # pass
-            b = self.block_tree.generate_block(self.mempool.popleft(), self.block_tree.current_round)
+            if self.mempool:
+                b = self.block_tree.generate_block(self.mempool.popleft(), self.block_tree.current_round)
             proposal_msg_p = ProposalMsg(b, last_tc, self.block_tree.high_commit_qc, "hello")
             send((PROPOSAL_MESSAGE, proposal_msg_p), to = replicas)
 
