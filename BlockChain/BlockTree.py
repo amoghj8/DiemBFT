@@ -9,11 +9,11 @@ class BlockTree:
     
     def __init__(self, ledger):
         self.pending_votes = defaultdict(list)
-        self.high_qc = None
-        self.high_commit_qc = None
         vote_info = VoteInfo("", -2, "", -3, "")
         qc = QC(vote_info, "", "", "")
         self.pending_block_tree = Block("", -1, "", qc, "Genesis")
+        self.high_qc = qc
+        self.high_commit_qc = qc
         self.ledger = ledger
 
     def process_qc(self, qc):
@@ -48,7 +48,7 @@ class BlockTree:
         vote_idx = hash(voteMessage.ledger_commit_info)
         self.pending_votes[vote_idx] = self.pending_votes[vote_idx].union(voteMessage.signature)
         #Change to proper value of f
-        f = 3
+        f = 1
         if (len(self.pending_votes[vote_idx]) == 2 * f + 1):
             qc = QC(voteMessage.vote_info, self.pending_votes[vote_idx], "Author 1", "Signature 1")
             return qc
