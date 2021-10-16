@@ -1,11 +1,17 @@
+from BlockChain.TimeoutInfo import TimeoutInfo
 import Ledger
+from VoteInfo import VoteInfo
+from LedgerCommitInfo import LedgerCommitInfo
+from VoteMsg import VoteMsg
 
 class Safety:
-    def __init__(self, private_key, public_keys):
+    def __init__(self, private_key, public_keys, ledger, block_tree):
         self.__private_key = private_key
         self.__public_keys = public_keys
         self.__highest_vote_round = 0
         self.__highest_qc_round = 0
+        self.ledger = ledger
+        self.block_tree = block_tree
     
     def __increase_highest_vote_round(self, round):
         self.__highest_vote_round = max(round, self.__highest_vote_round)
@@ -35,3 +41,21 @@ class Safety:
 
         else:
             return None
+
+
+    def make_vote(self, b, last_tc):
+        qc_round = b.qc.vote_info.round
+        if self.__safe_to_vote(b.round, qc_round, last_tc):
+            self.__update_highest_qc_round(qc_round)
+            self.__increase_highest_vote_round(b.round)
+            vote_info = VoteInfo(b.id, b.round, b.qc.vote_info.id, qc_round, self.ledger.pending_state(b.id))
+            ledger_commit_info = LedgerCommitInfo(self.__commit_state_id_candidate(b.round, b.qc), hash(vote_info))
+            return VoteMsg(vote_info, ledger_commit_info, self.block_tree.high_commit_qc)
+        return None
+
+    def make_timeout(round, high_qc, last_tc):
+        qc_round = high_qc.vote_info.round
+        if self.__safe_to_timeout(round, qc_round, last_tc):
+            self.__increase_highest_vote_round(round)
+            return TimeoutInfo(round, high_qc)
+        return None
