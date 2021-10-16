@@ -16,10 +16,11 @@ PROPOSAL_MESSAGE = "proposal_message"
 VOTE_MESSAGE = "vote_message"
 TIMEOUT_MESSAGE = "timeout_message"
 CLIENT_MESSAGE = "client_message"
+CLIENT_FIN_MESSAGE = "client_fin_message"
 
 class Replica(process):
     def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
-        self.tot_msg = 3
+        self.run_done = False
 
         # def __init__(self, pending_votes, high_qc, high_commit_qc, pending_block_tree):
         # Update with proper values
@@ -38,7 +39,8 @@ class Replica(process):
 
     def run():
         output("Replica Spawned, id = ", self.replica_id)
-        await(tot_msg == 0)
+        # await(self.tot_msg == 0)
+        await(self.run_done == True) # Also await on process finishing
 
     ################################################################################
     #   MAIN MODULE
@@ -112,12 +114,17 @@ class Replica(process):
         pass
 
     #Handler for client message
-    def receive(msg=(CLIENT_MESSAGE, client_request_message), from_ = client):
-        client_id = client_request_message.id
+    def receive(msg=(msg_type, client_message), from_ = client):
+        if(msg_type == CLIENT_FIN_MESSAGE):
+            self.run_done = True
+            return
+        
+        #Else - Message type = CLIENT_MESSAGE // request
+        # Todo - Add to Mempool
+        client_id = client_message.id
         client_verify_key = verify_key_list_client[client_id]
-        client_msg = verify_and_get_signed_message(client_request_message.signed_message, client_verify_key)
+        client_msg = verify_and_get_signed_message(client_message.signed_message, client_verify_key)
         output("Client", client_id,  "Sent me this message : ", client_msg)
-        tot_msg -= 1
 
     #Verifies the signed message and returns the message
     def verify_and_get_signed_message(signed_message : str, verify_key : nacl.signing.VerifyKey):

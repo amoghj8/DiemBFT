@@ -17,27 +17,31 @@ PROPOSAL_MESSAGE = "proposal_message"
 VOTE_MESSAGE = "vote_message"
 TIMEOUT_MESSAGE = "timeout_message"
 CLIENT_MESSAGE = "client_message"
+CLIENT_FIN_MESSAGE = "client_fin_message"
 
-class ClientRequestMessage:
+class ClientMessage:
     id : int
+    type : str
     signed_message : nacl.signing.SignedMessage
 
-    def __init__(self, id, signed_message):
+    def __init__(self, id, type, signed_message):
         self.id = id
+        self.type = type
         self.signed_message = signed_message
 
 class Client(process):
     def setup(client_id, replicas, verify_key, signing_key, verify_key_list_replica):
         pass
 
-    def send_client_req_msg(msg : str):
+    def send_client_req_msg(msg : str, type : str):
         signed_msg_to_send = sign_message(msg, self.signing_key)
-        client_request_message = ClientRequestMessage(self.client_id, signed_msg_to_send)
-        send((CLIENT_MESSAGE, client_request_message), to = replicas)
+        client_message = ClientMessage(self.client_id, type, signed_msg_to_send)
+        send((type, client_message), to = replicas)
 
     def run():
         output("Client Spawned, id = ", self.client_id)
-        send_client_req_msg("test")
+        send_client_req_msg("test", CLIENT_MESSAGE)
+        send_client_req_msg("test", CLIENT_FIN_MESSAGE)
 
 
     #Sign a message str using a signing key
