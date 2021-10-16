@@ -14,6 +14,8 @@ from TC import TC
 from TimeoutMsg import TimeoutMsg
 from ProposalMsg import ProposalMsg
 
+import pickle
+
 LOCAL_TIMEOUT = "local_timeout"
 PROPOSAL_MESSAGE = "proposal_message"
 VOTE_MESSAGE = "vote_message"
@@ -199,6 +201,8 @@ class Replica(process):
 
     #Handler for messages from other Replicas
     def receive(msg=(message_type, message_object), from_ = replica):
+        
+        searlizedObject = pickle.dumps(message_object)
         
         if message_type == PROPOSAL_MESSAGE:
             self.process_proposal_msg(message_object)
