@@ -33,11 +33,14 @@ class Replica(process):
         # #Update with proper values
         # self.leader_election = LeaderElection(replicas, 0, 0, replicas)
 
+        # self.ledger = Ledger(str(self.replica_id))
+        # self.block_tree = BlockTree(self.ledger)
+        self.safety = Safety(self.signing_key, verify_key_list_replica)
         self.pace_maker = Pacemaker(self)
 
         # #def __init__(self, private_key, public_keys):
         # #We already have private_key(signing key) & public_keys(verify keys)
-        # self.safety = Safety(self.signing_key, verify_key_list_replica)
+        self.safety = Safety(self.signing_key, verify_key_list_replica)
 
     def run():
         output("Replica Spawned, id = ", self.replica_id)

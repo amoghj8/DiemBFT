@@ -31,7 +31,8 @@ class Pacemaker:
     # In Replica
     # Function to be triggered on Timeout - in Replica
     def local_timeout_round(self):
-        timeout_info = Safety.make_timeout(self.current_round, BlockTree.high_qc, self.last_round_tc)
+        print(self.replica.run_done)
+        #timeout_info = self.replica.safety.make_timeout(self.current_round, self.replica.block_tree.high_qc, self.last_round_tc)
         # Todo - Send BroadCast message
 
     

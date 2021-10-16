@@ -1,11 +1,11 @@
-from BlockChain.TimeoutInfo import TimeoutInfo
+from TimeoutInfo import TimeoutInfo
 import Ledger
 from VoteInfo import VoteInfo
 from LedgerCommitInfo import LedgerCommitInfo
 from VoteMsg import VoteMsg
 
 class Safety:
-    def __init__(self, private_key, public_keys, ledger, block_tree):
+    def __init__(self, private_key, public_keys, ledger = None, block_tree = None):
         self.__private_key = private_key
         self.__public_keys = public_keys
         self.__highest_vote_round = 0
