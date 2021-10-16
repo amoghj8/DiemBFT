@@ -44,7 +44,7 @@ class Safety:
         print("111111111111111111111111111")
         if(self.__consecutive(block_round, qc.vote_info.round)):
             print("222222222222222222222222222222")
-            return self.ledger.pending_state(qc.id)
+            return self.ledger.pending_state(qc.vote_info.id)
 
         else:
             return None
