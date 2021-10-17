@@ -93,8 +93,8 @@ class Ledger():
                     if val.block_id in self.pending_blocks.keys():
                         self.commited_blocks[val.block_id] = self.pending_blocks[val.block_id]
                         del self.pending_blocks[val.block_id]
-                        if(mempool[0] in self.commited_blocks):
-                            mempool.popleft()
+                        if(val.block_id in self.commited_blocks and val.txns in mempool):
+                            mempool.remove(val.txns)
 
     
     """
