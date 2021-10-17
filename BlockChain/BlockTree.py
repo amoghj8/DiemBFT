@@ -1,13 +1,15 @@
 from Block import Block
+from LedgerCommitInfo import LedgerCommitInfo
 from QC import QC
 from Ledger import Ledger
+import hashlib
 
 from VoteInfo import VoteInfo
 from collections import defaultdict
 
 class BlockTree:
     
-    def __init__(self, ledger, public_key_list_replica):
+    def __init__(self, ledger, replica_id, signatures):
         self.pending_votes = defaultdict(list)
 
         #Create a genesis block and set it to pending block tree
@@ -27,6 +29,9 @@ class BlockTree:
         self.high_qc = QC(vote_info_for_genesis, public_key_list_replica, 0, public_key_list_replica[0])
         self.high_commit_qc = None
         self.ledger = ledger
+        self.current_round = 0
+        self.replica_id = replica_id
+        self.signatures = signatures
 
     def process_qc(self, qc, mempool):
         if qc is not None and qc.ledger_commit_info is not None:
@@ -49,8 +54,12 @@ class BlockTree:
 
     def execute_and_insert(self, b):
         # Sending block as ledger speculate function is expecting block
+        # print("current round = " + str(self.current_round))
         self.ledger.speculate(b)
         parentBlock = self.find_block(self.pending_block_tree, b.qc.vote_info.id)
+        if(parentBlock is None):
+            parentBlock = self.pending_block_tree
+        print("Current id = [" + str(b.id) + "] search pid = [" + str(b.qc.vote_info.id) + "] Parent Id = " + str(parentBlock.id))
         parentBlock.children.append(b)
         
     def process_vote(self, voteMessage, author, signature, mempool):
@@ -76,3 +85,6 @@ class BlockTree:
                 if child is not None:
                     return self.find_block(child, id)
         return None
+
+    def hashIt(self, str):
+        return hashlib.sha224(str.encode('ascii')).hexdigest()
