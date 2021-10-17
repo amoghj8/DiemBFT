@@ -46,11 +46,7 @@ class Client(process):
         send_client_req_msg("test5", CLIENT_MESSAGE)
         send_client_req_msg("test6", CLIENT_MESSAGE)
         send_client_req_msg("test7", CLIENT_MESSAGE)
-        # for i in range(10):
-        #     Time.sleep(3)
-        #     send_client_req_msg("test4", CLIENT_MESSAGE)
-
-            
+         
         send_client_req_msg("Finish", CLIENT_FIN_MESSAGE)
 
 

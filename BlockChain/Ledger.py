@@ -11,18 +11,17 @@ class Ledger():
         dt = datetime.now()
         ts = datetime.timestamp(dt)
         self.file_name = str(server_name) + "_" + str(ts) + ".json"
-        # self.file_name = "test.json"
         self.file = open(self.file_name, "x")
         self.file.close()
         self.root = LedgerNode("Genesis", "Genesis-1", "")
         self.curr = self.root
         self.pending_blocks = {}
         self.commited_blocks = {}
+        self.prev_commit_id = self.root.block_id
     
     
     """
     Add the block to the Speculative Ledger Branch and return the new Ledger State
-    """
     def speculate(self, blk):
         if blk.id in self.pending_blocks:
             return self.pending_state(blk.id)
@@ -43,6 +42,21 @@ class Ledger():
         self.curr = ledgerNode                                # Saving it here for faster lookup
         self.pending_blocks[block_id] = blk
         return ledgerNode.id
+        """
+
+
+    def speculate(self, blk):
+        if blk.id in self.pending_blocks:
+            return self.pending_state(blk.id)
+        
+        prev_block_id = blk.qc.vote_info.id
+        node = self.getLedgerNode(prev_block_id, self.root)
+        if node is None:
+            node = self.root
+        ledgerNode = LedgerNode(blk.id, node.id, blk.payload) # curr_node.id = Previous Level Ledger State Id for new Ledger Node
+        node.children.append(ledgerNode)
+        self.pending_blocks[blk.id] = blk
+        return ledgerNode.id
 
     
     """
@@ -58,10 +72,15 @@ class Ledger():
     Cache the Block for future Reference
     """
     def commit(self, block_id):
-        if block_id in self.commited_blocks:
+        if block_id in self.commited_blocks or block_id == "Genesis" or block_id == "Genesis-1":
             return
+        # lnode = self.getLedgerNode(self.prev_commit_id, self.root)
+        print("**********************************************************")
+        print("block_id = ", block_id)
+        print("**********************************************************")
         self.getTransactions(self.root, block_id, [])
-        # self.root = self.getLedgerNode(block_id, self.root)
+        self.root = self.getLedgerNode(block_id, self.root)
+        self.commited_blocks[block_id]
         pass
 
 
@@ -81,11 +100,9 @@ class Ledger():
         lst.append(lnode)
         if( lnode.block_id == blk_id ):
             self.write_to_file(lst)
-            return
         for child in lnode.children:
             self.getTransactions(child, blk_id, lst)
         lst = lst[:-1]
-    
     
     """
     Writes the Transactions to the file. Caches the committed Blocks 
@@ -93,7 +110,7 @@ class Ledger():
     def write_to_file(self, lst):
         with open(self.file_name, "a") as self.file:
             for val in lst:
-                if val.block_id == -1 and val.parent_id == -1:
+                if val.block_id == "Genesis" or  val.block_id == "Genesis-1" or val.block_id in self.commited_blocks: #and val.parent_id == -1:
                     continue # genesis Block
                 self.file.write(val.txns + "\n")
 

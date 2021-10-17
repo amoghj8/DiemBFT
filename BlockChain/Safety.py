@@ -57,9 +57,7 @@ class Safety:
             # ledger_id = self.ledger.pending_state(b.id)
             vote_info = VoteInfo(b.id, b.round, b.qc.vote_info.id, qc_round, self.ledger.pending_state(b.id))
             vote_info_hash = self.hashIt( str(b.id) + str(b.round) + str(b.qc.vote_info.id) + str(qc_round) + str(self.ledger.pending_state(b.id)) )
-            print("22222222222222222222222222222222")
             ledger_commit_info = LedgerCommitInfo(self.__commit_state_id_candidate(b.round, b.qc), vote_info_hash)
-            print("1111111111111111111111111111111")
             return VoteMsg(vote_info, ledger_commit_info, self.block_tree.high_commit_qc, 0, "sign") #need to change
         return None
 

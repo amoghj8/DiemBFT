@@ -44,7 +44,6 @@ class Replica(process):
             if await(self.round_done == True) : 
                 pass
             elif timeout(timer_duration):
-                print("Timeout Trigerred for Server : ", replica_id)
                 self.PaceMaker_local_timeout_round()
 
 
@@ -79,7 +78,6 @@ class Replica(process):
         if (vote_msg != None):
             #send vote msg to LeaderElection.get leader(current round+ 1)
             next_leader = self.leader_election.get_leader(self.block_tree.current_round+1)
-            print(replica_id, " Sending Vote Message*******************************")
             self.round_done = True
             send((VOTE_MESSAGE, vote_msg), to = self.replicas[next_leader])   # Fix - Need to send to only Next leader
             # print(replica_id, " Sent Vote Message*********************************")
@@ -119,7 +117,6 @@ class Replica(process):
             if self.mempool:
                 b = self.block_tree.generate_block(self.mempool.popleft(), self.block_tree.current_round)
                 proposal_msg_p = ProposalMsg(b, last_tc, self.block_tree.high_commit_qc, verify_key_list_replica[replica_id])
-                print("Sending Proposal Message from :", replica_id)
                 send((PROPOSAL_MESSAGE, proposal_msg_p), to = replicas.values())
 
 
@@ -137,10 +134,6 @@ class Replica(process):
         elif message_type == TIMEOUT_MESSAGE:
             print(replica_id, "Received Timeout Message *************************")
             self.process_timeout_msg(message_object)
-
-        else:
-            output("Message Type Not Recognized")
-
 
     #Handler for client message
     def receive(msg=(msg_type, client_message), from_ = clients):

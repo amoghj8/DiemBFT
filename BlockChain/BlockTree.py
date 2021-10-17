@@ -56,7 +56,6 @@ class BlockTree:
         parentBlock = self.find_block(self.pending_block_tree, b.qc.vote_info.id)
         if(parentBlock is None):
             parentBlock = self.pending_block_tree
-        print("Current id = [" + str(b.id) + "] search pid = [" + str(b.qc.vote_info.id) + "] Parent Id = " + str(parentBlock.id))
         parentBlock.children.append(b)
         
     def process_vote(self, voteMessage):
@@ -71,7 +70,7 @@ class BlockTree:
         return None
 
     def generate_block(self, txns, current_round):
-        return Block(self.replica_id, current_round, txns, self.high_qc, self.hashIt("Author 1" + str(current_round) + str(txns) + str(self.high_qc.vote_info.id) + str(self.signatures[self.replica_id])))
+        return Block(self.replica_id, current_round, txns, self.high_qc, self.hashIt(str(self.replica_id)+ str(current_round) + str(txns) + str(self.high_qc.vote_info.id) + str(self.signatures[self.replica_id])))
 
     def find_block(self, node, id):
         if(node.id == id):
