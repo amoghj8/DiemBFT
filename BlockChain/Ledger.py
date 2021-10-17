@@ -22,29 +22,7 @@ class Ledger():
     
     """
     Add the block to the Speculative Ledger Branch and return the new Ledger State
-    def speculate(self, blk):
-        if blk.id in self.pending_blocks:
-            return self.pending_state(blk.id)
-        
-        prev_block_id = blk.qc.vote_info.id
-        block_id = blk.id
-        txns = blk.payload
-        curr_node = self.root
-        if self.curr.block_id == prev_block_id:
-            curr_node = self.curr
-        
-        curr_node = self.getLedgerNode(prev_block_id, curr_node)
-        if curr_node == None:
-            curr_node = self.root
-        
-        ledgerNode = LedgerNode(block_id, curr_node.id, txns) # curr_node.id = Previous Level Ledger State Id for new Ledger Node
-        curr_node.children.append(ledgerNode)
-        self.curr = ledgerNode                                # Saving it here for faster lookup
-        self.pending_blocks[block_id] = blk
-        return ledgerNode.id
-        """
-
-
+    """
     def speculate(self, blk):
         if blk.id in self.pending_blocks:
             return self.pending_state(blk.id)
