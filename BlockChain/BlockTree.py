@@ -1,32 +1,25 @@
 from Block import Block
+from LedgerCommitInfo import LedgerCommitInfo
 from QC import QC
 from Ledger import Ledger
+import hashlib
 
 from VoteInfo import VoteInfo
 from collections import defaultdict
 
 class BlockTree:
     
-    def __init__(self, ledger, public_key_list_replica):
+    def __init__(self, ledger, replica_id, signatures):
         self.pending_votes = defaultdict(list)
 
-        #Create a genesis block and set it to pending block tree
-        #Vote info for genesis block
-        #id = None
-        #round = 0
-        #parent_id = None
-        #parent_round = -1
-        #exec_state_id = None
         vote_info_for_genesis = VoteInfo("idGenesis", 0, None, -1, None)
-
-        #Make a QC for the Genesis block
-        #Let author for Genesis block QC be 0 and 0 is assumed to be the leader
-        #Every block b (except for a known genesis block P0) is chained to a parent via b.qc,
-        # a Quorum Certiﬁcate (QC) that consists of a quorum of votes for the parent block
         self.pending_block_tree = Block(0, 0, "", None, "idGenesis")
-        self.high_qc = QC(vote_info_for_genesis, public_key_list_replica, 0, public_key_list_replica[0])
+        self.high_qc = QC(vote_info_for_genesis, signatures, 0, signatures[0])
         self.high_commit_qc = None
         self.ledger = ledger
+        self.current_round = 1
+        self.replica_id = replica_id
+        self.signatures = signatures
 
     def process_qc(self, qc, mempool):
         if qc is not None and qc.ledger_commit_info is not None:
@@ -41,16 +34,16 @@ class BlockTree:
             self.high_qc = qc
 
     def prune_pending_block_tree(self, node, id):
-        #Doesn't work always. Possible that direct children of pending block tree
-        #is what we wish to prune to
-        #Assume levels of non-TC yet wrong sequence ids, and later the pruning happens
-        #Should be dfs till the level where voteinfo.id == parent_id and set that node]
         self.pending_block_tree = self.find_block(node, id)
 
     def execute_and_insert(self, b):
         # Sending block as ledger speculate function is expecting block
+        # print("current round = " + str(self.current_round))
         self.ledger.speculate(b)
         parentBlock = self.find_block(self.pending_block_tree, b.qc.vote_info.id)
+        if(parentBlock is None):
+            parentBlock = self.pending_block_tree
+        print("Current id = [" + str(b.id) + "] search pid = [" + str(b.qc.vote_info.id) + "] Parent Id = " + str(parentBlock.id))
         parentBlock.children.append(b)
         
     def process_vote(self, voteMessage, author, signature, mempool):
@@ -76,3 +69,6 @@ class BlockTree:
                 if child is not None:
                     return self.find_block(child, id)
         return None
+
+    def hashIt(self, str):
+        return hashlib.sha224(str.encode('ascii')).hexdigest()

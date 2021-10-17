@@ -3,6 +3,9 @@ import sys
 from nacl.signing import SigningKey
 from collections import defaultdict
 
+import logging
+import pathlib
+
 from BlockTree import BlockTree
 from LeaderElection import LeaderElection
 from Safety import Safety
@@ -29,10 +32,9 @@ class Replica(process):
 
     # set based on the config
     def PaceMaker_get_round_timer(r = None):
-        delta = 1              # Todo - fetch from config
+        delta = 1
         return 4 * delta
-    
-    # Not required
+
     def PaceMaker_start_timer(new_round):
         self.round_done = True  # stop_timer(self.current_round)
         self.current_round = new_round
@@ -41,7 +43,7 @@ class Replica(process):
     def PaceMaker_local_timeout_round():
         timeout_info = self.safety.make_timeout(self.current_round, self.block_tree.high_qc, self.last_round_tc)
         tmoMsg = TimeoutMsg(timeout_info, self.last_round_tc, self.block_tree.high_commit_qc)
-        send((TIMEOUT_MESSAGE, tmoMsg), to = replicas)
+        send((TIMEOUT_MESSAGE, tmoMsg), to = replicas.values())
 
     def PaceMaker_process_remote_timeout(tmo):
         tmo_info = tmo.tmo_info
@@ -73,7 +75,7 @@ class Replica(process):
         if tc == None or tc.round < self.current_round:
             return False
         self.last_round_tc = tc
-        self.start_timer(tc.round + 1)
+        self.PaceMaker_start_timer(tc.round + 1)
         return True
 
     def PaceMaker_advance_round_qc(qc):
@@ -130,7 +132,7 @@ class Replica(process):
             self.process_new_round_event(None)
         
     def process_new_round_event(last_tc: TC):
-        # output("entering new round for ", self.replica_id, "mempool", self.mempool)
+        output("entering new round for ", self.replica_id, "mempool", self.mempool)
         u = self.current_round % len(self.replicas)
         if u != None and len(self.mempool) > 0:
             b = self.block_tree.generate_block(u, self.current_round, self.mempool.popleft(), "id" + str(self.current_round))
@@ -152,45 +154,29 @@ class Replica(process):
         self.pending_timeouts = defaultdict(list)
         # =======================================
 
-        self.first_leader = 0
-
         # ====== attributes for Mempool ======
         self.mempool = collections.deque()
         # =======================================
 
-        # # def __init__(self, pending_votes, high_qc, high_commit_qc, pending_block_tree):
-        # # Update with proper values
-        # # Create Genesis block and set pending_block_tree = Genesis block
         self.ledger = Ledger(self.replica_id)
-        self.block_tree = BlockTree(self.ledger, verify_key_list_replica)
-
-        # #def __init__(self, validators, window_size, exclude_size, reputation_leaders):
-        # #Update with proper values
-        # self.leader_election = LeaderElection(replicas, 0, 0, replicas)
-
-        # self.ledger = Ledger(str(self.replica_id))
-        # self.block_tree = BlockTree(self.ledger)
-
-        # #def __init__(self, private_key, public_keys):
-        # #We already have private_key(signing key) & public_keys(verify keys)
-        self.safety = Safety(self.signing_key, verify_key_list_replica, self.ledger, self.block_tree)
+        self.block_tree = BlockTree(self.ledger, self.replica_id, self.verify_key_list_replica)
+        self.safety = Safety(self.signing_key, self.verify_key_list_replica, self.ledger, self.block_tree)
 
     def run():
         output("Replica Spawned, id = ", self.replica_id)
-        # await(self.tot_msg == 0)
-        # while not self.run_done:
-        #     self.round_done = False
-        #     timer_duration = self.PaceMaker_get_round_timer()
-        #     if await(self.round_done == True) : 
-        #         pass
-        #     elif timeout(timer_duration):
-        #         print("Timeout Triggered")
-        #         self.PaceMaker_local_timeout_round()
+        while not self.run_done or len(self.mempool) > 0:
+            self.round_done = False
+            timer_duration = self.PaceMaker_get_round_timer()
+            if await(self.round_done == True):
+                pass
+            elif timeout(timer_duration):
+                print("Timeout Trigerred for Server : ", replica_id)
+                self.PaceMaker_local_timeout_round()
 
-        if(self.current_round == 1 and self.replica_id == 1):
-            #Get from the mempool and send a proposal message
-            await(len(self.mempool) > 0)
-            self.process_new_round_event(None)
+        # if(self.current_round == 1 and self.replica_id == 1):
+        #     #Get from the mempool and send a proposal message
+        #     await(len(self.mempool) > 0)
+        #     self.process_new_round_event(None)
 
         await(False)
 
@@ -212,10 +198,11 @@ class Replica(process):
             self.mempool.append(client_msg)
             
         elif message_type == PROPOSAL_MESSAGE:
+            output("i am replica", self.replica_id, " i am receiving proposal messages")
             self.process_proposal_msg(message_object)
 
         elif message_type == VOTE_MESSAGE:
-            # output("i am replica", self.replica_id, " i am receiving vote messages")
+            output("i am replica", self.replica_id, " i am receiving vote messages")
             self.process_vote_msg(message_object)
 
         elif message_type == TIMEOUT_MESSAGE:

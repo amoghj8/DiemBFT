@@ -30,8 +30,8 @@ def generate_signing_and_verify_keys(count : int):
 
 
 def main():
-    nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 3
-    nreplicas = int(sys.argv[2]) if len(sys.argv) > 2 else 10
+    nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 1
+    nreplicas = int(sys.argv[2]) if len(sys.argv) > 2 else 4
     ngst = 3000
 
     clients = new(Client, num = nclients)
@@ -44,18 +44,18 @@ def main():
     output("replica length " , len(replicas))
 
     #def setup(client_id, replicas, verify_key, signing_key, verify_key_list_replica):
-    #Client will have it's own signing key, verify key and, list of verify keys of replicas
     for i, client in enumerate(clients):
         output("**********************")
         setup(client, (i, replicas, verify_key_list_client[i], signing_key_list_client[i], verify_key_list_replica))
 
     replica_id_to_object = defaultdict(Replica)
+
     for i, replica in enumerate(replicas):
         replica_id_to_object[i] = replica
 
+    #def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
     for i, replica in enumerate(replicas):
         output("######################")
-        output(replicas)
         setup(replica, (i, replica_id_to_object, verify_key_list_replica[i], signing_key_list_replica[i], verify_key_list_replica, verify_key_list_client))
     
     start(replicas)
