@@ -7,6 +7,7 @@ from BlockTree import BlockTree
 from LeaderElection import LeaderElection
 from Safety import Safety
 from Ledger import Ledger
+from Mempool import Mempool
 
 from QC import QC
 from TC import TC
@@ -15,6 +16,8 @@ from TimeoutMsg import TimeoutMsg
 from ProposalMsg import ProposalMsg
 
 import pickle
+import logging
+import logging.config
 
 LOCAL_TIMEOUT = "local_timeout"
 PROPOSAL_MESSAGE = "proposal_message"
@@ -30,15 +33,18 @@ class Replica(process):
         self.run_done = False
         self.last_round_tc = None
         self.pending_timeouts = defaultdict(list)
-        self.mempool = collections.deque()
+        # self.mempool = collections.deque()
+        self.mem_pool = Mempool()
         self.ledger = Ledger(self.replica_id)
         self.block_tree = BlockTree(self.ledger, self.replica_id, self.verify_key_list_replica)
         self.leader_election = LeaderElection(replicas, 3, 3, replicas, self.ledger, self.block_tree)
         self.safety = Safety(self.signing_key, verify_key_list_replica, self.ledger, self.block_tree)
+        # self.log = self.Logger(file_name)
 
     def run():
         output("Replica Spawned, id = ", self.replica_id)
-        while not self.run_done or len(self.mempool) > 0:
+        # while not self.run_done or len(self.mempool) > 0:
+        while not self.run_done or self.mem_pool.exists():
             self.round_done = False
             timer_duration = self.PaceMaker_get_round_timer()
             if await(self.round_done == True) : 
@@ -60,8 +66,11 @@ class Replica(process):
         round = self.block_tree.current_round
         leader = self.leader_election.get_leader(round)
 
-        if P.block.payload in self.mempool:
-            self.mempool.remove(P.block.payload)
+        # if P.block.payload in self.mempool:
+        #     self.mempool.remove(P.block.payload)
+
+        print("Received Transaction Id = ", P.block.txn_id)
+        self.mem_pool.processTransaction(P.block.txn_id)
 
         # P.block.round != round V P.sender != leader ∨ P.block.author != leader
         #What is P.Sender ?, is it just P.block.author?
@@ -114,8 +123,11 @@ class Replica(process):
         u = self.leader_election.get_leader(self.block_tree.current_round)
         if u != None and u == replica_id:
             # pass
-            if self.mempool:
-                b = self.block_tree.generate_block(self.mempool.popleft(), self.block_tree.current_round)
+            # if self.mempool:
+            if self.mem_pool.exists():
+                # b = self.block_tree.generate_block(self.mempool.popleft(), self.block_tree.current_round)
+                (txn_id, txn) = self.mem_pool.getTransactions()
+                b = self.block_tree.generate_block(txn, self.block_tree.current_round, txn_id)
                 proposal_msg_p = ProposalMsg(b, last_tc, self.block_tree.high_commit_qc, verify_key_list_replica[replica_id])
                 send((PROPOSAL_MESSAGE, proposal_msg_p), to = replicas.values())
 
@@ -142,9 +154,11 @@ class Replica(process):
             return
         elif msg_type == CLIENT_MESSAGE:
             client_id = client_message.id
+            txn_id = client_message.txn_id
             client_verify_key = verify_key_list_client[client_id]
             client_msg = verify_and_get_signed_message(client_message.signed_message, client_verify_key)
-            self.mempool.append(client_msg)
+            # self.mempool.append(client_msg)
+            self.mem_pool.addTransaction(txn_id, client_msg)
 
     #Verifies the signed message and returns the message
     def verify_and_get_signed_message(signed_message : str, verify_key : nacl.signing.VerifyKey):
@@ -225,3 +239,17 @@ class Replica(process):
         self.last_round_tc = None
         self.PaceMaker_start_timer(qc.vote_info.round + 1)
         return True
+
+
+    def Logger(file_name):
+        logging.basicConfig(filename=file_name,
+                            filemode='a',
+                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            datefmt='%H:%M:%S',
+                            level=logging.DEBUG)
+
+        log_obj = logging.getLogger()
+        log_obj.setLevel(logging.DEBUG)
+
+        log_obj.info("Logger object created successfully..")
+        return log_obj

@@ -20,34 +20,36 @@ CLIENT_FIN_MESSAGE = "client_fin_message"
 
 class ClientMessage:
     id : int
+    txn_id: str
     type : str
     signed_message : nacl.signing.SignedMessage
 
-    def __init__(self, id, type, signed_message):
+    def __init__(self, id, type, txn_id, signed_message):
         self.id = id
         self.type = type
+        self.txn_id = txn_id
         self.signed_message = signed_message
 
 class Client(process):
     def setup(client_id, replicas, verify_key, signing_key, verify_key_list_replica):
         pass
 
-    def send_client_req_msg(msg : str, type : str):
+    def send_client_req_msg(msg : str, txn_id : str, type : str):
         signed_msg_to_send = sign_message(msg, self.signing_key)
-        client_message = ClientMessage(self.client_id, type, signed_msg_to_send)
+        client_message = ClientMessage(self.client_id, type, txn_id, signed_msg_to_send)
         send((type, client_message), to = replicas)
 
     def run():
         output("Client Spawned, id = ", self.client_id)
-        send_client_req_msg("test1", CLIENT_MESSAGE)
-        send_client_req_msg("test2", CLIENT_MESSAGE)
-        send_client_req_msg("test3", CLIENT_MESSAGE)
-        send_client_req_msg("test4", CLIENT_MESSAGE)
-        send_client_req_msg("test5", CLIENT_MESSAGE)
-        send_client_req_msg("test6", CLIENT_MESSAGE)
-        send_client_req_msg("test7", CLIENT_MESSAGE)
+        send_client_req_msg("test1", "0001",CLIENT_MESSAGE)
+        send_client_req_msg("test2", "0002",CLIENT_MESSAGE)
+        send_client_req_msg("test3", "0003",CLIENT_MESSAGE)
+        send_client_req_msg("test4", "0004",CLIENT_MESSAGE)
+        send_client_req_msg("test5", "0005",CLIENT_MESSAGE)
+        send_client_req_msg("test6", "0006",CLIENT_MESSAGE)
+        send_client_req_msg("test7", "0007",CLIENT_MESSAGE)
          
-        send_client_req_msg("Finish", CLIENT_FIN_MESSAGE)
+        send_client_req_msg("Finish", "fin_txn_id", CLIENT_FIN_MESSAGE)
 
 
     #Sign a message str using a signing key

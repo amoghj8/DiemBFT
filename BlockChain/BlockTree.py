@@ -18,7 +18,7 @@ class BlockTree:
         qc = QC(vote_info, "", "", "", ledger_commit_info)
 
         #VoteInfo and QC of Genesis Block
-        self.pending_block_tree = Block(-1, -1, "", qc, "Genesis")
+        self.pending_block_tree = Block(-1, -1, "", qc, "Genesis", "txn_id")
         vote_info_1 = VoteInfo("Genesis", -1, "Genesis-1", -2, "")
         self.high_qc = QC(vote_info_1, "", "", "", ledger_commit_info)
         self.high_commit_qc = self.high_qc
@@ -69,8 +69,8 @@ class BlockTree:
             return qc
         return None
 
-    def generate_block(self, txns, current_round):
-        return Block(self.replica_id, current_round, txns, self.high_qc, self.hashIt(str(self.replica_id)+ str(current_round) + str(txns) + str(self.high_qc.vote_info.id) + str(self.signatures[self.replica_id])))
+    def generate_block(self, txns, current_round, txn_id):
+        return Block(self.replica_id, current_round, txns, self.high_qc, self.hashIt(str(self.replica_id)+ str(current_round) + str(txns) + str(self.high_qc.vote_info.id) + str(self.signatures[self.replica_id])), txn_id)
 
     def find_block(self, node, id):
         if(node.id == id):
