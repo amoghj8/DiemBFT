@@ -28,17 +28,13 @@ class BlockTree:
         self.high_commit_qc = None
         self.ledger = ledger
 
-    def process_qc(self, qc):
+    def process_qc(self, qc, mempool):
         if qc is not None and qc.ledger_commit_info is not None:
             if qc.ledger_commit_info.commit_state_id is not None:
-                print("qc.vote_info.parent_id", qc.vote_info.parent_id)
-                self.ledger.commit(qc.vote_info.parent_id)
+                self.ledger.commit(qc.vote_info.parent_id, mempool)
                     # parent id becomes the new root of the pending block tree
                     # prune the pending Block Tree
                 self.prune_pending_block_tree(self.pending_block_tree, qc.vote_info.parent_id)
-                # else:
-                #     # handle the case when commit fails
-                #     pass
                 if self.high_commit_qc is None or (qc.vote_info.round > self.high_commit_qc.vote_info.round):
                     self.high_commit_qc = qc
         if qc is not None and qc.vote_info is not None and qc.vote_info.round > self.high_qc.vote_info.round:
@@ -55,11 +51,10 @@ class BlockTree:
         # Sending block as ledger speculate function is expecting block
         self.ledger.speculate(b)
         parentBlock = self.find_block(self.pending_block_tree, b.qc.vote_info.id)
-        print("sample", b.qc.vote_info.id, " ", parentBlock.id)
         parentBlock.children.append(b)
         
-    def process_vote(self, voteMessage, author, signature):
-        self.process_qc(voteMessage.high_commit_qc)
+    def process_vote(self, voteMessage, author, signature, mempool):
+        self.process_qc(voteMessage.high_commit_qc, mempool)
         vote_idx = voteMessage.ledger_commit_info.get_hash()
         self.pending_votes[vote_idx].append(voteMessage.signature)
         #Change to proper value of f
@@ -78,5 +73,6 @@ class BlockTree:
             if(block.id == id):
                 return block
             for child in block.children:
-                return self.find_block(child, id)
+                if child is not None:
+                    return self.find_block(child, id)
         return None

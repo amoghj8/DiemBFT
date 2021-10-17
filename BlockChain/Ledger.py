@@ -54,8 +54,8 @@ class Ledger():
     Prune other Ledger State Branches
     Cache the Block for future Reference
     """
-    def commit(self, block_id):
-        self.getTransactions(self.root, block_id, [])
+    def commit(self, block_id, mempool):
+        self.getTransactions(self.root, block_id, [], mempool)
         pass
 
 
@@ -70,28 +70,31 @@ class Ledger():
     Fetch All the Transactions from root to the Block Id till where the commit has to be done
     Call the Function write_to_file
     """
-    def getTransactions(self, lnode, blk_id, lst ):
+    def getTransactions(self, lnode, blk_id, lst, mempool):
         lst.append(lnode)
         if( lnode.block_id == blk_id ):
-            self.write_to_file(lst)
+            self.write_to_file(lst, mempool)
         for child in lnode.children:
-            self.getTransactions(child, blk_id, lst)
+            self.getTransactions(child, blk_id, lst, mempool)
         lst = lst[:-1]
     
     
     """
     Writes the Transactions to the file. Caches the committed Blocks 
     """
-    def write_to_file(self, lst):
+    def write_to_file(self, lst, mempool):
         with open(self.file_name, "a") as self.file:
             for val in lst:
-                # if val.block_id == 0 and val.parent_id == -1:
-                if val.block_id == "idGenesis" and val.parent_id == None:
-                    continue # genesis Block
-                print("hereeeee")
-                self.file.write(val.txns + "\n")
-                self.commited_blocks[val.block_id] = self.pending_blocks[val.block_id]
-                del self.pending_blocks[val.block_id]
+                if val.block_id not in self.commited_blocks:
+                    # if val.block_id == 0 and val.parent_id == -1:
+                    if val.block_id == "idGenesis" and val.parent_id == None:
+                        continue # genesis Block
+                    self.file.write(val.txns + "\n")
+                    if val.block_id in self.pending_blocks.keys():
+                        self.commited_blocks[val.block_id] = self.pending_blocks[val.block_id]
+                        del self.pending_blocks[val.block_id]
+                        if(mempool[0] in self.commited_blocks):
+                            mempool.popleft()
 
     
     """

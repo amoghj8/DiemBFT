@@ -39,7 +39,6 @@ class Replica(process):
         
     # Function to be triggered on Timeout
     def PaceMaker_local_timeout_round():
-        print('current round is : ', self.current_round)
         timeout_info = self.safety.make_timeout(self.current_round, self.block_tree.high_qc, self.last_round_tc)
         tmoMsg = TimeoutMsg(timeout_info, self.last_round_tc, self.block_tree.high_commit_qc)
         send((TIMEOUT_MESSAGE, tmoMsg), to = replicas)
@@ -89,7 +88,7 @@ class Replica(process):
 ################################################################################
 
     def process_certificate_qc(qc : QC):
-        self.block_tree.process_qc(qc)
+        self.block_tree.process_qc(qc, self.mempool)
         # self.leader_election.update_leaders(qc)
         self.PaceMaker_advance_round_qc(qc)
 
@@ -109,7 +108,7 @@ class Replica(process):
         self.block_tree.execute_and_insert(P.block)
         vote_msg = self.safety.make_vote(P.block, P.last_round_tc, 0)
         if (vote_msg != None):
-            output("i am replica", self.replica_id, "i am sending vote messages to ", self.replicas[0], " for id", vote_msg.vote_info.id)
+            # output("i am replica", self.replica_id, "i am sending vote messages to ", self.replicas[0], " for id", vote_msg.vote_info.id)
             send((VOTE_MESSAGE, vote_msg), to = self.replicas[0])
 
     def process_timeout_msg(M : TimeoutMsg):
@@ -124,16 +123,15 @@ class Replica(process):
             self.process_new_round_event(tc)
 
     def process_vote_msg(M: VoteMsg):
-        qc = self.block_tree.process_vote(M, 0, self.signing_key)
+        qc = self.block_tree.process_vote(M, 0, self.signing_key, self.mempool)
         if qc != None:
-            print("success da machaa")
             self.process_certificate_qc(qc)
             self.process_new_round_event(None)
         
     def process_new_round_event(last_tc: TC):
-        output("proces new round", self.current_round, "last_tc", last_tc)
+        # output("entering new round for ", self.replica_id, "mempool", self.mempool)
         u = 0
-        if u != None:
+        if u != None and len(self.mempool) > 0:
             b = self.block_tree.generate_block(u, self.current_round, self.mempool.popleft(), "id" + str(self.current_round))
             proposal_msg_p = ProposalMsg(b, last_tc, self.block_tree.high_commit_qc, self.sign_message(b.id, self.signing_key))
             send((PROPOSAL_MESSAGE, proposal_msg_p), to = self.replicas.values())
@@ -188,7 +186,7 @@ class Replica(process):
         #         print("Timeout Triggered")
         #         self.PaceMaker_local_timeout_round()
 
-        if(self.current_round == 1):
+        if(self.current_round == 1 and self.replica_id == 0):
             first_round_leader = 0
             #Get from the mempool and send a proposal message
             await(len(self.mempool) > 0)
@@ -210,14 +208,14 @@ class Replica(process):
             client_id = message_object.id
             client_verify_key = verify_key_list_client[client_id]
             client_msg = verify_and_get_signed_message(message_object.signed_message, client_verify_key)
-            output("Client", client_id,  "Sent me this message : ", client_msg)
+            # output("Client", client_id,  "Sent me this message : ", client_msg)
             self.mempool.append(client_msg)
             
         elif message_type == PROPOSAL_MESSAGE:
             self.process_proposal_msg(message_object)
 
         elif message_type == VOTE_MESSAGE:
-            output("i am replica", self.replica_id, " i am receiving vote messages")
+            # output("i am replica", self.replica_id, " i am receiving vote messages")
             self.process_vote_msg(message_object)
 
         elif message_type == TIMEOUT_MESSAGE:

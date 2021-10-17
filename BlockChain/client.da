@@ -43,6 +43,8 @@ class Client(process):
         send_client_req_msg("test2" + str(self.client_id), CLIENT_MESSAGE)
         send_client_req_msg("test3" + str(self.client_id), CLIENT_MESSAGE)
         send_client_req_msg("test4" + str(self.client_id), CLIENT_MESSAGE)
+        send_client_req_msg("Dummy" + str(self.client_id), CLIENT_MESSAGE)
+        send_client_req_msg("Dummy" + str(self.client_id), CLIENT_MESSAGE)
         send_client_req_msg("Finish", CLIENT_FIN_MESSAGE)
 
 
