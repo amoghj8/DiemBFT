@@ -30,20 +30,23 @@ class LeaderElection:
         return sample(activeValidators, 1)
 
     def update_leaders(self, qc):
-        extended_round = qc.vote_info.parent_round
-        qc_round = qc.vote_info.round 
-        current_round = self.block_tree.current_round
-        if extended_round + 1 == qc_round and qc_round + 1 == current_round:
-            # self.reputation_leaders[current_round + 1] = self.elect_reputation_leader(qc)
-            pass
+        self.count += 1
+        # return self.count % len(self.validators)
+        # extended_round = qc.vote_info.parent_round
+        # qc_round = qc.vote_info.round 
+        # current_round = self.block_tree.current_round
+        # if extended_round + 1 == qc_round and qc_round + 1 == current_round:
+        #     # self.reputation_leaders[current_round + 1] = self.elect_reputation_leader(qc)
+        #     pass
 
     def get_leader(self, round):
+        return round % len(self.validators)
         # if round in self.reputation_leaders:
         #     return self.reputation_leaders[round]
-        next_leader = self.count % len(self.validators)
-        print("Leader = " + str(next_leader))
-        self.count += 1
-        return next_leader % len(self.validators)
+        # next_leader = self.count % len(self.validators)
+        # print("Leader = " + str(next_leader))
+        # self.count += 1
+        # return next_leader % len(self.validators)
         # return self.validators[math.floor(round / 2) % len(self.validators)]
 
 

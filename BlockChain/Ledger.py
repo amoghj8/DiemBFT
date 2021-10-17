@@ -14,7 +14,7 @@ class Ledger():
         # self.file_name = "test.json"
         self.file = open(self.file_name, "x")
         self.file.close()
-        self.root = LedgerNode(-1, -1, "")
+        self.root = LedgerNode("Genesis", "Genesis-1", "")
         self.curr = self.root
         self.pending_blocks = {}
         self.commited_blocks = {}
@@ -24,6 +24,9 @@ class Ledger():
     Add the block to the Speculative Ledger Branch and return the new Ledger State
     """
     def speculate(self, blk):
+        if blk.id in self.pending_blocks:
+            return self.pending_state(blk.id)
+        
         prev_block_id = blk.qc.vote_info.id
         block_id = blk.id
         txns = blk.payload
@@ -46,7 +49,6 @@ class Ledger():
     Return the Ledger State of the associated Block Id
     """
     def pending_state(self, block_id):
-        print("Searching for Block Id = " + str(block_id))
         return self.getLedgerNode(block_id, self.root).id
 
     
@@ -56,7 +58,10 @@ class Ledger():
     Cache the Block for future Reference
     """
     def commit(self, block_id):
+        if block_id in self.commited_blocks:
+            return
         self.getTransactions(self.root, block_id, [])
+        # self.root = self.getLedgerNode(block_id, self.root)
         pass
 
 
@@ -76,6 +81,7 @@ class Ledger():
         lst.append(lnode)
         if( lnode.block_id == blk_id ):
             self.write_to_file(lst)
+            return
         for child in lnode.children:
             self.getTransactions(child, blk_id, lst)
         lst = lst[:-1]
@@ -100,6 +106,7 @@ class Ledger():
     Takes Block Id and returns the Ledger Node( Ledger State )
     """
     def getLedgerNode(self, id, lnode):
+        # print("lnode.block_id = ", lnode.block_id, ". id = ", id)
         if(lnode.block_id == id):
             return lnode 
         

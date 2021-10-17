@@ -49,10 +49,14 @@ def main():
         output("**********************")
         setup(client, (i, replicas, verify_key_list_client[i], signing_key_list_client[i], verify_key_list_replica))
 
-    #def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
+    replica_id_to_object = defaultdict(Replica)
+    for i, replica in enumerate(replicas):
+        replica_id_to_object[i] = replica
+
     for i, replica in enumerate(replicas):
         output("######################")
-        setup(replica, (i, replicas, verify_key_list_replica[i], signing_key_list_replica[i], verify_key_list_replica, verify_key_list_client, clients))
+        output(replicas)
+        setup(replica, (i, replica_id_to_object, verify_key_list_replica[i], signing_key_list_replica[i], verify_key_list_replica, verify_key_list_client))
     
     start(replicas)
     start(clients)

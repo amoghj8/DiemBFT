@@ -8,3 +8,4 @@ class VoteInfo():
         self.parent_round = parent_round
         self.exec_state_id = exec_state_id
         
+        
