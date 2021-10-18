@@ -5,7 +5,7 @@ class Mempool:
         self.initial_transactions = OrderedDict()
         self.pending_transactions = OrderedDict()
         self.committed_transactions = {}
-
+        self.acknowledged_transactions = {}
     
     """
     Check to see if there any transactions that need to be served

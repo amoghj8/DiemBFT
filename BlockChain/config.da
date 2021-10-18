@@ -10,7 +10,7 @@ class MsgType(Enum):
     TimeOut = 3
     Vote = 4
     Wildcard = 5
-
+    
 class FailType(Enum):
     MsgLoss = 1
     Delay = 2
