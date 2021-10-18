@@ -8,10 +8,10 @@ import logging
 
 class Ledger():
     """Ledger Module"""
-    def __init__(self, server_name, mempool):
+    def __init__(self, server_name, mempool, logger):
         dt = datetime.now()
         ts = datetime.timestamp(dt)
-        self.file_name = str(server_name) + "_" + str(ts) + ".json"
+        self.file_name = 'ledger_' +  str(server_name) + "_" + str(ts) + ".json"
         self.file = open(self.file_name, "x")
         self.file.close()
         self.root = LedgerNode("Genesis", "Genesis-1", "")
@@ -20,15 +20,16 @@ class Ledger():
         self.commited_blocks = {}
         self.prev_commit_id = self.root.block_id
         self.mempool = mempool
-    
-    
+        self.logger = logger
+        self.logger.debug('Ledger module init complete')
+
     """
     Add the block to the Speculative Ledger Branch and return the new Ledger State
     """
     def speculate(self, blk):
         if blk.id in self.pending_blocks:
             return self.pending_state(blk.id)
-        
+
         prev_block_id = blk.qc.vote_info.id
         node = self.getLedgerNode(prev_block_id, self.root)
         if node is None:
@@ -39,14 +40,14 @@ class Ledger():
         print("New ledger state ", ledgerNode.id)
         return ledgerNode.id
 
-    
+
     """
     Return the Ledger State of the associated Block Id
     """
     def pending_state(self, block_id):
         return self.getLedgerNode(block_id, self.root).id
 
-    
+
     """
     Commit all the transactions from Previous Commit(root) to the current Ledger State
     Prune other Ledger State Branches
@@ -67,7 +68,7 @@ class Ledger():
         return self.commited_blocks[block_id] if block_id in self.commited_blocks else None
         # return self.commited_blocks[block_id] if self.commited_blocks.has_key(block_id) else None
 
-    
+
     """
     Fetch All the Transactions from root to the Block Id till where the commit has to be done
     Call the Function write_to_file
@@ -79,9 +80,9 @@ class Ledger():
         for child in lnode.children:
             self.getTransactions(child, blk_id, lst)
         lst = lst[:-1]
-    
+
     """
-    Writes the Transactions to the file. Caches the committed Blocks 
+    Writes the Transactions to the file. Caches the committed Blocks
     """
     def write_to_file(self, lst):
         with open(self.file_name, "a") as self.file:
@@ -95,14 +96,14 @@ class Ledger():
                     self.commited_blocks[val.block_id] = self.pending_blocks[val.block_id]
                     del self.pending_blocks[val.block_id]
 
-    
+
     """
     Takes Block Id and returns the Ledger Node( Ledger State )
     """
     def getLedgerNode(self, id, lnode):
         if(lnode.block_id == id):
-            return lnode 
-        
+            return lnode
+
         my_node = None
         for val in lnode.children:
             my_node = self.getLedgerNode(id, val)
@@ -110,8 +111,8 @@ class Ledger():
                 return my_node
         return my_node
 
-    
-""" 
+
+"""
     block id : Id of the Block associated with the current Ledger State
     parent_id : Id of the parent Ledger Node
     txns : Transactions associated with the state

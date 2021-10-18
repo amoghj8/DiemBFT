@@ -6,6 +6,7 @@ from nacl.signing import SigningKey
 from collections import defaultdict
 from enum import Enum
 from collections import namedtuple
+from datetime import datetime
 
 from BlockTree import BlockTree
 from LeaderElection import LeaderElection
@@ -50,16 +51,16 @@ CLIENT_FIN_MESSAGE = "client_fin_message"
 class Replica(process):
 
     def setup(replica_id, clients, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
+        self.log = self.Logger(str(replica_id) + str(datetime.timestamp(datetime.now())))
         self.run_done = False
         self.last_round_tc = None
         self.pending_timeouts = defaultdict(list)
         # self.mempool = collections.deque()
-        self.mem_pool = Mempool()
-        self.ledger = Ledger(self.replica_id, self.mem_pool)
-        self.block_tree = BlockTree(self.ledger, self.replica_id, self.verify_key_list_replica)
-        self.leader_election = LeaderElection(replicas, 3, 3, replicas, self.ledger, self.block_tree)
-        self.safety = Safety(self.signing_key, verify_key_list_replica, self.ledger, self.block_tree)
-        # self.log = self.Logger(file_name)
+        self.mem_pool = Mempool(self.log)
+        self.ledger = Ledger(self.replica_id, self.mem_pool, self.log)
+        self.block_tree = BlockTree(self.ledger, self.replica_id, self.verify_key_list_replica, self.log)
+        self.leader_election = LeaderElection(replicas, 3, 3, replicas, self.ledger, self.block_tree, self.log)
+        self.safety = Safety(self.signing_key, verify_key_list_replica, self.ledger, self.block_tree, self.log)
 
     def run():
         print("Replica Spawned, id = ", self.replica_id)
@@ -75,7 +76,7 @@ class Replica(process):
                     txn_to_ack = txn_to_ack[0]
                     self.mem_pool.acknowledged_transactions[txn_to_ack] = self.mem_pool.committed_transactions[txn_to_ack]
                     send_ack(str(txn_to_ack))
-            if await(self.round_done == True) : 
+            if await(self.round_done == True) :
                 pass
             elif timeout(timer_duration):
                 self.PaceMaker_local_timeout_round()
@@ -84,19 +85,19 @@ class Replica(process):
         clientId =  int(txn_to_commit.split(',')[0])
         txnID = str(txn_to_commit.split(',')[1])
         send((txnID), to = self.clients[clientId])
-        
+
     def setattr(attr,val):
         if attr == "current_round":
             self.block_tree.current_round = val
         elif attr == "highest_vote_round":
             self.safety.set_highest_vote_round(val)
-        
+
     def process_certificate_qc(qc : QC):
         self.block_tree.process_qc(qc)
         self.leader_election.update_leaders(qc)
         self.PaceMaker_advance_round_qc(qc)
 
-        
+
     def process_proposal_msg(P : ProposalMsg):
         self.process_certificate_qc(P.block.qc)
         self.process_certificate_qc(P.high_commit_qc)
@@ -104,16 +105,16 @@ class Replica(process):
         round = self.block_tree.current_round
         leader = self.leader_election.get_leader(round)
         self.mem_pool.processTransaction(P.block.txn_id)
-        
+
 
         self.block_tree.execute_and_insert(P.block)
         vote_msg = self.safety.make_vote(P.block, P.last_round_tc, self.replica_id, self.verify_key)
-      
+
         if (vote_msg != None):
             #send vote msg to LeaderElection.get leader(current round+ 1)
             next_leader = self.leader_election.get_leader(self.block_tree.current_round+1)
             self.round_done = True
-            send((MsgType.Vote, vote_msg), to = self.replicas[next_leader])   
+            send((MsgType.Vote, vote_msg), to = self.replicas[next_leader])
             pass
 
     def process_timeout_msg(M : TimeoutMsg):
@@ -153,7 +154,7 @@ class Replica(process):
 
     #Handler for messages from other Replicas
     def receive(msg=(message_type, message_object), from_ = replica):
-        
+
         if message_type == MsgType.Proposal:
             print("processing proposal message")
             self.process_proposal_msg(message_object)
@@ -191,12 +192,12 @@ class Replica(process):
     def PaceMaker_get_round_timer(r = None):
         delta = 1              # Todo - fetch from config
         return 4 * delta
-    
+
     # Not required
     def PaceMaker_start_timer(new_round):
         self.round_done = True  # stop_timer(self.current_round)
         self.block_tree.current_round = new_round
-        
+
     # Function to be triggered on Timeout
     def PaceMaker_local_timeout_round():
         timeout_info = self.safety.make_timeout(self.block_tree.current_round, self.block_tree.high_qc, self.last_round_tc)
@@ -207,11 +208,11 @@ class Replica(process):
         print("sending timeout message")
         send((MsgType.TimeOut, tmoMsg), to = replicas.values())
 
-    
+
 
     # TimeoutMsg Handler======================================================================
     def PaceMaker_process_remote_timeout(tmo):
-        
+
         tmo_info = tmo.tmo_info
         if tmo_info.round < self.block_tree.current_round:
             return None
@@ -224,7 +225,7 @@ class Replica(process):
 
         if len(lst_sender) == f+1:
             # stop_timer(self.current_round)
-            self.round_done = True 
+            self.round_done = True
             self.PaceMaker_local_timeout_round()
 
 
@@ -259,10 +260,10 @@ class Replica(process):
                             filemode='a',
                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                             datefmt='%H:%M:%S',
-                            level=logging.DEBUG)
+                            level=logging.INFO)
 
         log_obj = logging.getLogger()
-        log_obj.setLevel(logging.DEBUG)
+        log_obj.setLevel(logging.INFO)
 
         log_obj.info("Logger object created successfully..")
         return log_obj
@@ -278,7 +279,7 @@ class ReplicaFI(process, Replica):
         # for fail_case in failure_config.failures:
         #     if (( fail_case.src is None or fail_case.src == self.replica_id or fail_case.src == '_') and \
         #         ( fail_case.msg_tye is None or fail_case.msg_type == m[0] or fail_case.msg_type ==  MsgType.Wildcard ) and \
-        #         ( fail_case.round is None or fail_case.round == self.block_tree.current_round ) and 
+        #         ( fail_case.round is None or fail_case.round == self.block_tree.current_round ) and
         #         ( fail_case is None or fail_case.prob >= i ) ):
         #         pass
         #         # if fail_case.dest not in to:
