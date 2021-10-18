@@ -11,6 +11,7 @@ from QC import QC
 
 from TimeoutMsg import TimeoutMsg
 from ProposalMsg import ProposalMsg
+import config
 
 LOCAL_TIMEOUT = "local_timeout"
 PROPOSAL_MESSAGE = "proposal_message"
@@ -45,14 +46,14 @@ class Client(process):
 
 
     def run():
-        output("Client Spawned, id = ", self.client_id)
-        send_client_req_msg("test1" + str(self.client_id), "0001",CLIENT_MESSAGE)
-        send_client_req_msg("test2" + str(self.client_id), "0002",CLIENT_MESSAGE)
-        send_client_req_msg("test3" + str(self.client_id), "0003",CLIENT_MESSAGE)
-        send_client_req_msg("test4" + str(self.client_id), "0004",CLIENT_MESSAGE)
-        send_client_req_msg("test5" + str(self.client_id), "0005",CLIENT_MESSAGE)
-        send_client_req_msg("test6" + str(self.client_id), "0006",CLIENT_MESSAGE)
-        send_client_req_msg("test7" + str(self.client_id), "0007",CLIENT_MESSAGE)
+        n = config.nbr_request
+        for i in range(0, n):
+            message = "test_" + str(i) + "_" + str(self.client_id)
+            transaction_id = "000" + str(i)
+            send_client_req_msg(message, transaction_id,CLIENT_MESSAGE)
+
+        send_client_req_msg("Dummy", "d0000001",CLIENT_MESSAGE)
+        send_client_req_msg("Dummy", "d0000002",CLIENT_MESSAGE)
          
         send_client_req_msg("Finish", "fin_txn_id", CLIENT_FIN_MESSAGE)
         await (len(clientDict) > 2)

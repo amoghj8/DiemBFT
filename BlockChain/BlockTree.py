@@ -82,4 +82,4 @@ class BlockTree:
             self.find_block(child, id)
 
     def hashIt(self, str):
-        return hashlib.sha224(str.encode('ascii')).hexdigest()
+        return hashlib.sha256(str.encode('ascii')).hexdigest()

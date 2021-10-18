@@ -2,6 +2,7 @@ import collections
 from random import random
 import sys
 import time
+from typing import OrderedDict
 from nacl.signing import SigningKey
 from collections import defaultdict
 from enum import Enum
@@ -22,10 +23,9 @@ from ProposalMsg import ProposalMsg
 
 import pickle
 import logging
-import config
-from config import FailType
-
+import logging.config
 from config import *
+
 # from config_1 import *
 
 
@@ -35,17 +35,6 @@ from config import *
 CLIENT_MESSAGE = "client_message"
 CLIENT_FIN_MESSAGE = "client_fin_message"
 
-# class MsgType(Enum):
-#     Proposal = 1
-#     QC = 2
-#     TimeOut = 3
-#     Vote = 4
-#     Wildcard = 5
-
-# class FailType(Enum):
-#     MsgLoss = 1
-#     Delay = 2
-#     SetAttr = 3
 # ------------------------------------------------------
 
 class Replica(process):
@@ -263,7 +252,7 @@ class Replica(process):
                             level=logging.INFO)
 
         log_obj = logging.getLogger()
-        log_obj.setLevel(logging.INFO)
+        log_obj.setLevel(logging.DEBUG)
 
         log_obj.info("Logger object created successfully..")
         return log_obj
@@ -273,28 +262,30 @@ class Replica(process):
 
 class ReplicaFI(process, Replica):
     def send(m, to):
-        pass
-        # dont_send = False
-        # i = 0.6
-        # for fail_case in failure_config.failures:
-        #     if (( fail_case.src is None or fail_case.src == self.replica_id or fail_case.src == '_') and \
-        #         ( fail_case.msg_tye is None or fail_case.msg_type == m[0] or fail_case.msg_type ==  MsgType.Wildcard ) and \
-        #         ( fail_case.round is None or fail_case.round == self.block_tree.current_round ) and
-        #         ( fail_case is None or fail_case.prob >= i ) ):
-        #         pass
-        #         # if fail_case.dest not in to:
-        #         #     continue
-        #         if fail_case.fail_type == FailType.MsgLoss:
-        #             dont_send = True
-        #         elif fail_case.fail_type == FailType.Delay:
-        #             time.sleep(4)
-        #         elif fail_case.fail_type == FailType.SetAttr:
-        #             setattr(fail_case.attr, fail_case.val)
-        #         elif fail_case.fail_type == FailType.Crash:
-        #             dont_send = True
+        dont_send = False
+        # random.seed(config.failure_config.seed)
+        i = random()
+        for fail_case in failure_config.failures:
+            if (( fail_case.src is None or fail_case.src == self.replica_id or fail_case.src == '_') and \
+                ( fail_case.msg_type is None or fail_case.msg_type == m[0] or fail_case.msg_type ==  MsgType.Wildcard ) and \
+                ( fail_case.round is None or fail_case.round == self.block_tree.current_round ) and 
+                ( fail_case is None or fail_case.prob >= i ) ):
 
-        # if not dont_send:
-        #     super().send(m,to)
+                if fail_case.fail_type == FailType.Crash:
+                    return
+
+                if fail_case.fail_type == FailType.SetAttr:
+                    setattr(fail_case.attr, fail_case.val)
+                    super().send(m,to)
+                    return
+
+                if fail_case.fail_type == FailType.MsgLoss:
+                    return
+
+                if fail_case.fail_type == FailType.Delay:
+                    time.sleep(4)
+                    super().send(m,to)
+                    return
 
     # def send(m, [to, id]):
     #     pass

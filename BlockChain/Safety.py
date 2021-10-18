@@ -6,7 +6,7 @@ from VoteMsg import VoteMsg
 import hashlib
 
 class Safety:
-    def __init__(self, private_key, public_keys, ledger = None, block_tree = None, logger):
+    def __init__(self, private_key, public_keys, ledger = None, block_tree = None, logger=None):
         self.__private_key = private_key
         self.__public_keys = public_keys
         self.__highest_vote_round = -2
@@ -70,4 +70,4 @@ class Safety:
         return None
 
     def hashIt(self, str):
-        return hashlib.sha224(str.encode('ascii')).hexdigest()
+        return hashlib.sha256(str.encode('ascii')).hexdigest()

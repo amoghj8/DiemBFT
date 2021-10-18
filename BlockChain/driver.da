@@ -54,7 +54,7 @@ def main():
         replica_id_to_object[i] = replica
 
     for i, replica in enumerate(faulty_replicas):
-        replica_id_to_object[i+nreplicas] = replica
+        replica_id_to_object[i+config.nreplicas] = replica
 
     client_id_to_object = defaultdict(Client)
     for i, client in enumerate(clients):
@@ -66,7 +66,7 @@ def main():
 
     for i, replica in enumerate(faulty_replicas):
         output(faulty_replicas)
-        setup(replica, (i + nreplicas, client_id_to_object, replica_id_to_object, verify_key_list_replica[i+nreplicas], signing_key_list_replica[i+nreplicas], verify_key_list_replica, verify_key_list_client))
+        setup(replica, (i + config.nreplicas, client_id_to_object, replica_id_to_object, verify_key_list_replica[i+config.nreplicas], signing_key_list_replica[i+config.nreplicas], verify_key_list_replica, verify_key_list_client))
     
     start(replicas)
     start(faulty_replicas)

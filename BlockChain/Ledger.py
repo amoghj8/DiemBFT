@@ -127,4 +127,4 @@ class LedgerNode:
         self.block_id = block_id
 
     def hashIt(self, str):
-        return hashlib.sha224(str.encode('ascii')).hexdigest()
+        return hashlib.sha256(str.encode('ascii')).hexdigest()
