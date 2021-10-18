@@ -7,7 +7,7 @@ import hashlib
 
 class Ledger():
     """Ledger Module"""
-    def __init__(self, server_name):
+    def __init__(self, server_name, mempool):
         dt = datetime.now()
         ts = datetime.timestamp(dt)
         self.file_name = str(server_name) + "_" + str(ts) + ".json"
@@ -18,6 +18,7 @@ class Ledger():
         self.pending_blocks = {}
         self.commited_blocks = {}
         self.prev_commit_id = self.root.block_id
+        self.mempool = mempool
     
     
     """
@@ -53,13 +54,12 @@ class Ledger():
         if block_id in self.commited_blocks or block_id == "Genesis" or block_id == "Genesis-1":
             return
         # lnode = self.getLedgerNode(self.prev_commit_id, self.root)
-        print("**********************************************************")
-        print("block_id = ", block_id)
-        print("**********************************************************")
+        # print("**********************************************************")
+        # print("block_id = ", block_id)
+        # print("**********************************************************")
         self.getTransactions(self.root, block_id, [])
         self.root = self.getLedgerNode(block_id, self.root)
-        self.commited_blocks[block_id]
-        pass
+        self.mempool.commitTransactions(self.commited_blocks[block_id].txn_id)
 
 
     """

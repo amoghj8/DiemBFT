@@ -46,6 +46,9 @@ class Safety:
         else:
             return None
 
+    def set_highest_vote_round(self, value):
+        self.__highest_vote_round = value
+
 
     def make_vote(self, b, last_tc):
         qc_round = b.qc.vote_info.round

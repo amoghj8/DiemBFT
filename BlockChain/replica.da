@@ -1,7 +1,11 @@
 import collections
+from random import random
 import sys
+import time
 from nacl.signing import SigningKey
 from collections import defaultdict
+from enum import Enum
+from collections import namedtuple
 
 from BlockTree import BlockTree
 from LeaderElection import LeaderElection
@@ -19,15 +23,26 @@ import pickle
 import logging
 import logging.config
 
-LOCAL_TIMEOUT = "local_timeout"
-PROPOSAL_MESSAGE = "proposal_message"
-VOTE_MESSAGE = "vote_message"
-TIMEOUT_MESSAGE = "timeout_message"
+# PROPOSAL_MESSAGE = "proposal_message"
+# VOTE_MESSAGE = "vote_message"
+# TIMEOUT_MESSAGE = "timeout_message"
 CLIENT_MESSAGE = "client_message"
 CLIENT_FIN_MESSAGE = "client_fin_message"
 
-class Replica(process):
+class MsgType(Enum):
+    Proposal = 1
+    QC = 2
+    TimeOut = 3
+    Vote = 4
+    Wildcard = 5
 
+class FailType(Enum):
+    MsgLoss = 1
+    Delay = 2
+    SetAttr = 3
+# ------------------------------------------------------
+
+class Replica(process):
 
     def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
         self.run_done = False
@@ -35,7 +50,7 @@ class Replica(process):
         self.pending_timeouts = defaultdict(list)
         # self.mempool = collections.deque()
         self.mem_pool = Mempool()
-        self.ledger = Ledger(self.replica_id)
+        self.ledger = Ledger(self.replica_id, self.mem_pool)
         self.block_tree = BlockTree(self.ledger, self.replica_id, self.verify_key_list_replica)
         self.leader_election = LeaderElection(replicas, 3, 3, replicas, self.ledger, self.block_tree)
         self.safety = Safety(self.signing_key, verify_key_list_replica, self.ledger, self.block_tree)
@@ -52,6 +67,13 @@ class Replica(process):
             elif timeout(timer_duration):
                 self.PaceMaker_local_timeout_round()
 
+
+    def setattr(attr,val):
+        if attr == "current_round":
+            self.block_tree.current_round = val
+        elif attr == "highest_vote_round":
+            self.safety.set_highest_vote_round(val)
+        
 
     def process_certificate_qc(qc : QC):
         self.block_tree.process_qc(qc)
@@ -88,7 +110,7 @@ class Replica(process):
             #send vote msg to LeaderElection.get leader(current round+ 1)
             next_leader = self.leader_election.get_leader(self.block_tree.current_round+1)
             self.round_done = True
-            send((VOTE_MESSAGE, vote_msg), to = self.replicas[next_leader])   # Fix - Need to send to only Next leader
+            send((MsgType.Vote, vote_msg), to = self.replicas[next_leader])   # Fix - Need to send to only Next leader
             # print(replica_id, " Sent Vote Message*********************************")
             pass
 
@@ -129,21 +151,21 @@ class Replica(process):
                 (txn_id, txn) = self.mem_pool.getTransactions()
                 b = self.block_tree.generate_block(txn, self.block_tree.current_round, txn_id)
                 proposal_msg_p = ProposalMsg(b, last_tc, self.block_tree.high_commit_qc, verify_key_list_replica[replica_id])
-                send((PROPOSAL_MESSAGE, proposal_msg_p), to = replicas.values())
+                send((MsgType.Proposal, proposal_msg_p), to = replicas.values())
 
 
     #Handler for messages from other Replicas
     def receive(msg=(message_type, message_object), from_ = replica):
         
-        if message_type == PROPOSAL_MESSAGE:
+        if message_type == MsgType.Proposal:
             print(replica_id, "Received Proposal Message ***********************")
             self.process_proposal_msg(message_object)
 
-        elif message_type == VOTE_MESSAGE:
+        elif message_type == MsgType.Vote:
             print(replica_id, "Received Vote Message *****************************")
             self.process_vote_msg(message_object)
 
-        elif message_type == TIMEOUT_MESSAGE:
+        elif message_type == MsgType.TimeOut:
             print(replica_id, "Received Timeout Message *************************")
             self.process_timeout_msg(message_object)
 
@@ -184,7 +206,7 @@ class Replica(process):
             #Send TC Anyway
             pass
         tmoMsg = TimeoutMsg(timeout_info, self.last_round_tc, self.block_tree.high_commit_qc)
-        send((TIMEOUT_MESSAGE, tmoMsg), to = replicas.values())
+        send((MsgType.TimeOut, tmoMsg), to = replicas.values())
 
     
 
@@ -253,3 +275,34 @@ class Replica(process):
 
         log_obj.info("Logger object created successfully..")
         return log_obj
+
+# ----------------------------------------- End of Replica Class -------------------------------
+
+
+FailureConfig = namedtuple('FailureConfig', ['failures', 'seed'], defaults=(None))
+Failure = namedtuple('Failure', ['src', 'dest', 'msg_type', 'round', 'prob', 'fail_type', 'val', 'attr'], defaults=(None,None))
+
+class ReplicaFI(process, Replica):
+    def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
+        super().setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client)
+
+        self.failure_config = FailureConfig(failures =  [ 
+            Failure(src='_',dest='leader',msg_type=MsgType.Vote,round=1,prob=1,fail_type=FailType.Delay, val=0.1), 
+            Failure(src=2,dest='_',msg_type=MsgType.Wildcard,round=3,prob=0.5,fail_type=FailType.MsgLoss),  
+            Failure(src='leader',dest='_',msg_type=MsgType.Vote,round=3,prob=0.5,fail_type=FailType.SetAttr,val=2,attr='highest_vote_round')],seed = 12345678)
+
+    def send(m, to):
+        random.seed(self.failure_config.seed)
+        i = random.randrage(0, 1)
+        dont_send = False
+        for fail_case in self.failure_config.failures:
+            if ( fail_case.src == self.replica_id or fail_case.src == '_') and ( fail_case.msg_type == m[0] or fail_case.msg_type ==  MsgType.Wildcard ) and fail_case.round == self.block_tree.current_round and i >= fail_case.prob:
+                if fail_case.fail_type == FailType.MsgLoss:
+                    dont_send = True
+                if fail_case.fail_type == FailType.Delay:
+                    time.sleep(4)
+                if fail_case.fail_type == FailType.SetAttr:
+                    pass
+                pass
+        if not dont_send:
+            super().send(m,to)
