@@ -12,4 +12,4 @@ class VoteInfo():
     
     def get_hash(self):
         s = str(self.id) + str(self.round) + str(self.parent_id) + str(self.parent_round)
-        return hashlib.sha224(s.encode('ascii')).hexdigest()
+        return hashlib.sha256(s.encode('ascii')).hexdigest()

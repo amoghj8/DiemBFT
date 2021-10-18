@@ -9,5 +9,5 @@ class LedgerCommitInfo():
 
 	def get_hash(self):
 		s = str(self.commit_state_id) + str(self.vote_info_hash)
-		return hashlib.sha224(s.encode('ascii')).hexdigest()
+		return hashlib.sha256(s.encode('ascii')).hexdigest()
 		
