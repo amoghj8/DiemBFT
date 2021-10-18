@@ -51,10 +51,8 @@ class Safety:
     def make_vote(self, b, last_tc, leader, signature):
         qc_round = b.qc.vote_info.round
         if self.__safe_to_vote(b.round, qc_round, last_tc):
-        # if True:
             self.__update_highest_qc_round(qc_round)
             self.__increase_highest_vote_round(b.round)
-            # ledger_id = self.ledger.pending_state(b.id)
             vote_info = VoteInfo(b.id, b.round, b.qc.vote_info.id, qc_round, self.ledger.pending_state(b.id))
             vote_info_hash = self.hashIt( str(b.id) + str(b.round) + str(b.qc.vote_info.id) + str(qc_round) + str(self.ledger.pending_state(b.id)) )
             ledger_commit_info = LedgerCommitInfo(self.__commit_state_id_candidate(b.round, b.qc), vote_info_hash)
