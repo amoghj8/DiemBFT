@@ -23,23 +23,25 @@ import pickle
 import logging
 import logging.config
 
+from config import *
+
 # PROPOSAL_MESSAGE = "proposal_message"
 # VOTE_MESSAGE = "vote_message"
 # TIMEOUT_MESSAGE = "timeout_message"
 CLIENT_MESSAGE = "client_message"
 CLIENT_FIN_MESSAGE = "client_fin_message"
 
-class MsgType(Enum):
-    Proposal = 1
-    QC = 2
-    TimeOut = 3
-    Vote = 4
-    Wildcard = 5
+# class MsgType(Enum):
+#     Proposal = 1
+#     QC = 2
+#     TimeOut = 3
+#     Vote = 4
+#     Wildcard = 5
 
-class FailType(Enum):
-    MsgLoss = 1
-    Delay = 2
-    SetAttr = 3
+# class FailType(Enum):
+#     MsgLoss = 1
+#     Delay = 2
+#     SetAttr = 3
 # ------------------------------------------------------
 
 class Replica(process):
@@ -283,26 +285,29 @@ FailureConfig = namedtuple('FailureConfig', ['failures', 'seed'], defaults=(None
 Failure = namedtuple('Failure', ['src', 'dest', 'msg_type', 'round', 'prob', 'fail_type', 'val', 'attr'], defaults=(None,None))
 
 class ReplicaFI(process, Replica):
-    def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
-        super().setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client)
+    # def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
+    #     # super().setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client)
 
-        self.failure_config = FailureConfig(failures =  [ 
-            Failure(src='_',dest='leader',msg_type=MsgType.Vote,round=1,prob=1,fail_type=FailType.Delay, val=0.1), 
-            Failure(src=2,dest='_',msg_type=MsgType.Wildcard,round=3,prob=0.5,fail_type=FailType.MsgLoss),  
-            Failure(src='leader',dest='_',msg_type=MsgType.Vote,round=3,prob=0.5,fail_type=FailType.SetAttr,val=2,attr='highest_vote_round')],seed = 12345678)
+    #     self.failure_config = FailureConfig(failures =  [ 
+    #         Failure(src='_',dest='leader',msg_type=MsgType.Vote,round=1,prob=1,fail_type=FailType.Delay, val=0.1), 
+    #         Failure(src=2,dest='_',msg_type=MsgType.Wildcard,round=3,prob=0.5,fail_type=FailType.MsgLoss),  
+    #         Failure(src='leader',dest='_',msg_type=MsgType.Vote,round=3,prob=0.5,fail_type=FailType.SetAttr,val=2,attr='highest_vote_round')],seed = 12345678)
 
     def send(m, to):
-        random.seed(self.failure_config.seed)
-        i = random.randrage(0, 1)
+        # print("Seed Value = ", self.failure_config.seed)
+        # random.seed(self.failure_config.seed)
+        # i = random.randrage(0, 1)
         dont_send = False
-        for fail_case in self.failure_config.failures:
+        i = 0.6
+        for fail_case in failure_config.failures:
             if ( fail_case.src == self.replica_id or fail_case.src == '_') and ( fail_case.msg_type == m[0] or fail_case.msg_type ==  MsgType.Wildcard ) and fail_case.round == self.block_tree.current_round and i >= fail_case.prob:
+                if fail_case.dest not in to:
+                    continue
                 if fail_case.fail_type == FailType.MsgLoss:
                     dont_send = True
                 if fail_case.fail_type == FailType.Delay:
                     time.sleep(4)
                 if fail_case.fail_type == FailType.SetAttr:
-                    pass
-                pass
+                    setattr(fail_case.attr, fail_case.val)
         if not dont_send:
             super().send(m,to)
