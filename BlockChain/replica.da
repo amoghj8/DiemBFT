@@ -22,8 +22,11 @@ from ProposalMsg import ProposalMsg
 import pickle
 import logging
 import logging.config
+from config import FailType
 
-from config import *
+# from config import *
+from config_1 import *
+
 
 # PROPOSAL_MESSAGE = "proposal_message"
 # VOTE_MESSAGE = "vote_message"
@@ -64,6 +67,7 @@ class Replica(process):
         while not self.run_done or self.mem_pool.exists():
             self.round_done = False
             timer_duration = self.PaceMaker_get_round_timer()
+            # print("keyyyyyyyyyyyyyyyyyyyyyyyys", self.mem_pool.committed_transactions.keys())
             if await(self.round_done == True) : 
                 pass
             elif timeout(timer_duration):
@@ -284,14 +288,23 @@ class ReplicaFI(process, Replica):
         dont_send = False
         i = 0.6
         for fail_case in failure_config.failures:
-            if ( fail_case.src == self.replica_id or fail_case.src == '_') and ( fail_case.msg_type == m[0] or fail_case.msg_type ==  MsgType.Wildcard ) and fail_case.round == self.block_tree.current_round and i >= fail_case.prob:
-                if fail_case.dest not in to:
-                    continue
+            if (( fail_case.src is None or fail_case.src == self.replica_id or fail_case.src == '_') and \
+                ( fail_case.msg_tye is None or fail_case.msg_type == m[0] or fail_case.msg_type ==  MsgType.Wildcard ) and \
+                ( fail_case.round is None or fail_case.round == self.block_tree.current_round ) and 
+                ( fail_case is None or fail_case.prob >= i ) ):
+                pass
+                # if fail_case.dest not in to:
+                #     continue
                 if fail_case.fail_type == FailType.MsgLoss:
                     dont_send = True
-                if fail_case.fail_type == FailType.Delay:
+                elif fail_case.fail_type == FailType.Delay:
                     time.sleep(4)
-                if fail_case.fail_type == FailType.SetAttr:
+                elif fail_case.fail_type == FailType.SetAttr:
                     setattr(fail_case.attr, fail_case.val)
+                elif fail_case.fail_type == FailType.Crash:
+                    dont_send = True
+
         if not dont_send:
             super().send(m,to)
+
+    
