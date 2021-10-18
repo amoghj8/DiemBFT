@@ -42,7 +42,7 @@ class BlockTree:
     Process qc
     """
     def process_qc(self, qc):
-        self.logger.debug('Processing QC')
+        self.logger.debug('Processing QC from sender ')
         if qc.ledger_commit_info.commit_state_id is not None:
             if self.ledger.commit(qc.vote_info.parent_id):
                 # parent id becomes the new root of the pending block tree

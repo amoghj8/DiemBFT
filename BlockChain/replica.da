@@ -118,7 +118,7 @@ class Replica(process):
     Process Proposal Message
     """
     def process_proposal_msg(P : ProposalMsg):
-        self.log.debug('Processing proposal message')
+        self.log.debug('Processing proposal message' + P.block.id)
         self.process_certificate_qc(P.block.qc)
         self.process_certificate_qc(P.high_commit_qc)
         self.PaceMaker_advance_round_tc(P.last_round_tc)
@@ -340,13 +340,15 @@ class ReplicaFI(process, Replica):
         return
         dont_send = False
         
+        # failure_config = FailureConfig(failures =  [ 
+        #     Failure(src='_',dest='leader',msg_type=MsgType.Vote,round=1,prob=1,fail_type=FailType.Delay, val=0.1), 
+        #     Failure(src=2,dest='_',msg_type=MsgType.Wildcard,round=3,prob=0.5,fail_type=FailType.MsgLoss),  
+        #     Failure(src='leader',dest='_',msg_type=MsgType.Vote,round=3,prob=0.5,fail_type=FailType.SetAttr,val=2,attr='highest_vote_round')]
+        # ,seed = 12345678)
+
         failure_config = FailureConfig(failures =  [ 
-            Failure(src='_',dest='leader',msg_type=MsgType.Vote,round=1,prob=1,fail_type=FailType.Delay, val=0.1), 
-            Failure(src=2,dest='_',msg_type=MsgType.Wildcard,round=3,prob=0.5,fail_type=FailType.MsgLoss),  
-            Failure(src='leader',dest='_',msg_type=MsgType.Vote,round=3,prob=0.5,fail_type=FailType.SetAttr,val=2,attr='highest_vote_round')]
+            Failure(src='_',dest='_',msg_type=MsgType.Wildcard,round=None,prob=1,fail_type=FailType.Delay, val=1)]
         ,seed = 12345678)
-        
-        random.seed(config.failure_config.seed)
         i = random()
 
         for fail_case in failure_config.failures:
