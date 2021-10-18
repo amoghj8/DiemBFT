@@ -20,7 +20,7 @@ class FailType(Enum):
 ngst = 3000
 delta = 1
 
-nclients = 1
+nclients = 3
 totreplicas = 4
 f = 1
 nreplicas = totreplicas - f
