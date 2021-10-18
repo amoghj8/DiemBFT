@@ -6,17 +6,19 @@ from VoteMsg import VoteMsg
 import hashlib
 
 class Safety:
-    def __init__(self, private_key, public_keys, ledger = None, block_tree = None):
+    def __init__(self, private_key, public_keys, ledger = None, block_tree = None, logger):
         self.__private_key = private_key
         self.__public_keys = public_keys
         self.__highest_vote_round = -2
         self.__highest_qc_round = -2
         self.ledger = ledger
         self.block_tree = block_tree
-    
+        self.logger = logger
+        self.logger.debug('Safety module init complete')
+
     def __increase_highest_vote_round(self, round):
         self.__highest_vote_round = max(round, self.__highest_vote_round)
-    
+
     def __update_highest_qc_round(self, qc_round):
         self.__highest_qc_round = max(qc_round, self.__highest_qc_round)
 

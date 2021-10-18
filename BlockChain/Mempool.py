@@ -2,18 +2,20 @@ from collections import OrderedDict
 import logging
 
 class Mempool:
-    def __init__(self):
+    def __init__(self, logger):
         self.initial_transactions = OrderedDict()
         self.pending_transactions = OrderedDict()
         self.committed_transactions = {}
         self.acknowledged_transactions = {}
-    
+        self.logger = logger
+        self.logger.debug('Mempool init complete')
+
     """
     Check to see if there any transactions that need to be served
     """
     def exists(self):
         return True if self.initial_transactions else False
-    
+
     """
     Add the trasaction if not commited/not currently executing/not in queue
     """
@@ -23,7 +25,7 @@ class Mempool:
             print("setting initial transaction with key", key, " and value", val)
             return True
         return False
-    
+
 
     """
     Return the Next transaction to be served
@@ -39,7 +41,7 @@ class Mempool:
             return (first_key, value)
         else: return None
 
-    
+
     """
     Commit the Transaction - on Ledger.commit
     Remove it from the initial and pending queue if it exists
@@ -64,7 +66,7 @@ class Mempool:
             self.pending_transactions[key] = self.initial_transactions[key]
             print("moving transaction to pending queue with key ", key, "and value", self.pending_transactions[key])
             del self.initial_transactions[key]
-    
+
     """
     Remove the Transaction from pending(executing) queue - on TC
     """

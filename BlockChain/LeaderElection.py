@@ -5,14 +5,16 @@ from random import sample
 
 class LeaderElection:
     count = 0
-    def __init__(self, validators, window_size, exclude_size, reputation_leaders, ledger, block_tree):
+    def __init__(self, validators, window_size, exclude_size, reputation_leaders, ledger, block_tree, logger):
         self.validators = validators
         self.window_size = window_size
         self.exclude_size = exclude_size
         self.reputation_leaders = reputation_leaders
         self.ledger = ledger
         self.block_tree = block_tree
-
+        self.logger = logger
+        self.logger.debug('LeaderElection init complete')
+        
     def elect_reputation_leader(self, qc):
         activeValidators = set()
         lastAuthors = set()
@@ -33,7 +35,7 @@ class LeaderElection:
         self.count += 1
         # return self.count % len(self.validators)
         # extended_round = qc.vote_info.parent_round
-        # qc_round = qc.vote_info.round 
+        # qc_round = qc.vote_info.round
         # current_round = self.block_tree.current_round
         # if extended_round + 1 == qc_round and qc_round + 1 == current_round:
         #     # self.reputation_leaders[current_round + 1] = self.elect_reputation_leader(qc)
@@ -47,5 +49,3 @@ class LeaderElection:
         # self.count += 1
         # return next_leader % len(self.validators)
         # return self.validators[math.floor(round / 2) % len(self.validators)]
-
-

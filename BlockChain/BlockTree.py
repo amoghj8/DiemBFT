@@ -11,7 +11,7 @@ from collections import defaultdict
 
 class BlockTree:
 
-    def __init__(self, ledger, replica_id, signatures):
+    def __init__(self, ledger, replica_id, signatures, logger):
         self.pending_votes = defaultdict(list)
         ledger_commit_info = LedgerCommitInfo("state_id", "hash")
 
@@ -29,6 +29,8 @@ class BlockTree:
         self.current_round = 0
         self.replica_id = replica_id
         self.signatures = signatures
+        self.logger = logger
+        self.logger.debug('BlockTree init complete')
 
     def process_qc(self, qc):
         if qc.ledger_commit_info.commit_state_id is not None:
