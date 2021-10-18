@@ -8,6 +8,9 @@ from collections import defaultdict
 from enum import Enum
 from collections import namedtuple
 from datetime import datetime
+from enum import Enum
+from collections import namedtuple
+
 
 from BlockTree import BlockTree
 from LeaderElection import LeaderElection
@@ -45,15 +48,18 @@ class Replica(process):
     """
     Setup
     """
-    def setup(replica_id, clients, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
+    def setup(replica_id, clients, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client, nbr_faulty, delta):
         self.log = self.Logger(str(replica_id) + str(datetime.timestamp(datetime.now())))
+        self.f = nbr_faulty
+        self.delta = delta
         self.run_done = False
         self.last_round_tc = None
         self.pending_timeouts = defaultdict(list)
         # self.mempool = collections.deque()
         self.mem_pool = Mempool(self.log)
+        self.max_tries = 3
         self.ledger = Ledger(self.replica_id, self.mem_pool, self.log)
-        self.block_tree = BlockTree(self.ledger, self.replica_id, self.verify_key_list_replica, self.log)
+        self.block_tree = BlockTree(self.ledger, self.replica_id, self.verify_key_list_replica, self.log, self.f)
         self.leader_election = LeaderElection(replicas, 3, 3, replicas, self.ledger, self.block_tree, self.log)
         self.safety = Safety(self.signing_key, verify_key_list_replica, self.ledger, self.block_tree, self.log)
 
@@ -63,30 +69,31 @@ class Replica(process):
     def run():
         self.log.debug("Replica Spawned")
         # while not self.run_done or len(self.mempool) > 0:
-        while not self.run_done or self.mem_pool.exists():
+        while not self.run_done or self.mem_pool.exists():    
             self.round_done = False
             timer_duration = self.PaceMaker_get_round_timer()
-            x = self.mem_pool.committed_transactions.keys()
-            y = self.mem_pool.acknowledged_transactions.keys()
-            txn_to_ack = list(x - y)
-            if len(txn_to_ack) > 0:
-                if self.replica_id == self.leader_election.get_leader(self.block_tree.current_round):
-                    txn_to_ack = txn_to_ack[0]
-                    self.mem_pool.acknowledged_transactions[txn_to_ack] = self.mem_pool.committed_transactions[txn_to_ack]
-                    send_ack(str(txn_to_ack))
             if await(self.round_done == True) :
                 pass
             elif timeout(timer_duration):
                 self.PaceMaker_local_timeout_round()
-
+            
     """
     Send acknowledgement
     """
-    def send_ack(txn_to_commit):
-        clientId =  int(txn_to_commit.split(',')[0])
-        txnID = str(txn_to_commit.split(',')[1])
-        self.log.debug('sending acknowledgement to client for transaction id')
-        send((txnID), to = self.clients[clientId])
+    def send_ack():
+        x = self.mem_pool.committed_transactions.keys()
+        y = self.mem_pool.acknowledged_transactions.keys()
+        txn_to_ack = list(x - y)
+        if len(txn_to_ack) > 0:
+            if self.replica_id == self.leader_election.get_leader(self.block_tree.current_round):
+                txn_to_ack = txn_to_ack[0]
+                self.mem_pool.acknowledged_transactions[txn_to_ack] = self.mem_pool.committed_transactions[txn_to_ack]
+                txn_to_commit = str(txn_to_ack)
+                clientId =  int(txn_to_commit.split(',')[0])
+                txnID = str(txn_to_commit.split(',')[1])
+                self.log.debug('sending acknowledgement to client for transaction id')
+                send((txnID), to = self.clients[clientId])
+
 
     """
     Setting attribute with values
@@ -120,7 +127,6 @@ class Replica(process):
         self.mem_pool.processTransaction(P.block.txn_id)
         self.block_tree.execute_and_insert(P.block)
         vote_msg = self.safety.make_vote(P.block, P.last_round_tc, self.replica_id, self.verify_key)
-
         if (vote_msg != None):
             #send vote msg to LeaderElection.get leader(current round+ 1)
             next_leader = self.leader_election.get_leader(self.block_tree.current_round+1)
@@ -204,7 +210,7 @@ class Replica(process):
             client_verify_key = verify_key_list_client[client_id]
             client_msg = verify_and_get_signed_message(client_message.signed_message, client_verify_key)
             self.mem_pool.addTransaction(str(client_id) + ',' + str(txn_id), client_msg)
-            self.log.debug("added transaction ")
+            self.log.debug("Transaction added to mempool")
 
 
     """
@@ -220,8 +226,7 @@ class Replica(process):
     Get round timer
     """
     def PaceMaker_get_round_timer(r = None):
-        delta = 1              # Todo - fetch from config
-        return 4 * delta
+        return 4 * self.delta
 
     """
     Pacemaker Start timer
@@ -242,6 +247,7 @@ class Replica(process):
         self.log.debug("sending timeout message")
         send((MsgType.TimeOut, tmoMsg), to = replicas.values())
 
+
     """
     TimeoutMsg Handler
     """
@@ -259,12 +265,11 @@ class Replica(process):
             self.PaceMaker_local_timeout_round()
         lst_high_qc_round = [tmo_v.high_qc for tmo_v in self.pending_timeouts[tmo_info.round]]
         lst_signature     = [tmo_v.signature for tmo_v in self.pending_timeouts[tmo_info.round]]
-        if len(lst_sender) == 2*f+1:
+        if len(lst_sender) == 2 * self.f + 1:
             return TC(tmo_info.round, lst_high_qc_round, lst_signature)
         return None
 
     """
-
     Pacemaker advance round TC
     """
     def PaceMaker_advance_round_tc(tc):
@@ -303,22 +308,53 @@ class Replica(process):
 
 # ----------------------------------------- End of Replica Class -------------------------------
 
+
+"""
+MessageType Enum
+"""
+class MsgType(Enum):
+    Proposal = 1
+    QC = 2
+    TimeOut = 3
+    Vote = 4
+    Wildcard = 5
+
+"""
+FailType Enum
+"""    
+class FailType(Enum):
+    MsgLoss = 1
+    Delay = 2
+    SetAttr = 3
+
+
+FailureConfig = namedtuple('FailureConfig', ['failures', 'seed'], defaults=(None, [None, None]))
+Failure = namedtuple('Failure', ['src', 'dest', 'msg_type', 'round', 'prob', 'fail_type', 'val', 'attr'], defaults=(None,[None, None, None, None, None, None, None, None]))
+
+
 """
 Replica Fault Injection Class
 """
 class ReplicaFI(process, Replica):
     def send(m, to):
+        return
         dont_send = False
-        # random.seed(config.failure_config.seed)
+        
+        failure_config = FailureConfig(failures =  [ 
+            Failure(src='_',dest='leader',msg_type=MsgType.Vote,round=1,prob=1,fail_type=FailType.Delay, val=0.1), 
+            Failure(src=2,dest='_',msg_type=MsgType.Wildcard,round=3,prob=0.5,fail_type=FailType.MsgLoss),  
+            Failure(src='leader',dest='_',msg_type=MsgType.Vote,round=3,prob=0.5,fail_type=FailType.SetAttr,val=2,attr='highest_vote_round')]
+        ,seed = 12345678)
+        
+        random.seed(config.failure_config.seed)
         i = random()
+
         for fail_case in failure_config.failures:
             if (( fail_case.src is None or fail_case.src == self.replica_id or fail_case.src == '_') and \
                 ( fail_case.msg_type is None or fail_case.msg_type == m[0] or fail_case.msg_type ==  MsgType.Wildcard ) and \
                 ( fail_case.round is None or fail_case.round == self.block_tree.current_round ) and 
                 ( fail_case is None or fail_case.prob >= i ) ):
 
-                if fail_case.fail_type == FailType.Crash:
-                    return
 
                 if fail_case.fail_type == FailType.SetAttr:
                     setattr(fail_case.attr, fail_case.val)
@@ -332,6 +368,3 @@ class ReplicaFI(process, Replica):
                     time.sleep(4)
                     super().send(m,to)
                     return
-
-    # def send(m, [to, id]):
-    #     pass

@@ -16,7 +16,7 @@ class BlockTree:
     """
     init
     """
-    def __init__(self, ledger, replica_id, signatures, logger):
+    def __init__(self, ledger, replica_id, signatures, logger, f):
         self.pending_votes = defaultdict(list)
         ledger_commit_info = LedgerCommitInfo("state_id", "hash")
 
@@ -29,6 +29,7 @@ class BlockTree:
         vote_info_1 = VoteInfo("Genesis", -1, "Genesis-1", -2, "")
         self.high_qc = QC(vote_info_1, "", "", "", ledger_commit_info)
         self.high_commit_qc = self.high_qc
+        self.f = f
 
         self.ledger = ledger
         self.current_round = 0
@@ -88,7 +89,7 @@ class BlockTree:
         self.pending_votes[vote_idx].append(voteMessage.signature)
         #Change to proper value of f
         #f = 1
-        if (len(self.pending_votes[vote_idx]) == 2 * config.f + 1):
+        if (len(self.pending_votes[vote_idx]) == 2 * self.f + 1):
             qc = QC(voteMessage.vote_info, self.pending_votes[vote_idx], leader, str(self.signatures[leader]), voteMessage.ledger_commit_info)
             return qc
         return None

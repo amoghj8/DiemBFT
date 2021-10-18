@@ -43,8 +43,9 @@ class Client(process):
     """
     Setup
     """
-    def setup(client_id, clientDict, replicas, verify_key, signing_key, verify_key_list_replica):
+    def setup(client_id, clientDict, replicas, verify_key, signing_key, verify_key_list_replica, number_of_requests):
         output("Setup of client completed", level=logging.DEBUG)
+        self.acknowledge_tx = {}
         pass
 
     """
@@ -56,13 +57,13 @@ class Client(process):
         #output("sending client message", client_message, "to", replicas, level=logging.INFO)
         send((type, client_message), to = replicas)
         clientDict[txn_id] = client_message
+        self.received_fin = False
 
     """
     Run
     """
     def run():
-        n = config.nbr_request
-        for i in range(0, n):
+        for i in range(0, self.number_of_requests):
             message = "test_" + str(i) + "_" + str(self.client_id)
             transaction_id = "000" + str(i)
             send_client_req_msg(message, transaction_id,CLIENT_MESSAGE)
@@ -71,16 +72,19 @@ class Client(process):
         send_client_req_msg("Dummy", "d0000002",CLIENT_MESSAGE)
          
         send_client_req_msg("Finish", "fin_txn_id", CLIENT_FIN_MESSAGE)
-        await (len(clientDict) > 2)
+        await ( len(clientDict) - len(acknowledge_tx) > 2 )
 
     """
     Receive
     """
-    def receive(msg=(txnId), from_ = replica):
-        output("received transaction id", txnId, "from replica ", replica, level=logging.INFO)
-        if txnId in self.clientDict.keys():
-            del self.clientDict[txnId]
+    def receive(msg=(txnId), from_ = replicas):
+        output("received transaction id", txnId, "from replica ", replicas, level=logging.INFO)
+        if txnId == "FIN":
+            self.received_fin = True
+        elif txnId not in self.acknowledge_tx.keys():
+            self.acknowledge_tx[txnId] = 1
 
+    
     """
     Signing message
     """
