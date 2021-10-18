@@ -21,3 +21,9 @@ failure_config = FailureConfig(failures =  [
             Failure(src=2,dest='_',msg_type=MsgType.Wildcard,round=3,prob=0.5,fail_type=FailType.MsgLoss),  
             Failure(src='leader',dest='_',msg_type=MsgType.Vote,round=3,prob=0.5,fail_type=FailType.SetAttr,val=2,attr='highest_vote_round')],seed = 12345678)
     
+nclients = 3
+nreplicas = 10
+ngst = 3000
+delta = 1
+f = 1
+nFreplicas = 2

@@ -281,22 +281,8 @@ class Replica(process):
 # ----------------------------------------- End of Replica Class -------------------------------
 
 
-FailureConfig = namedtuple('FailureConfig', ['failures', 'seed'], defaults=(None))
-Failure = namedtuple('Failure', ['src', 'dest', 'msg_type', 'round', 'prob', 'fail_type', 'val', 'attr'], defaults=(None,None))
-
 class ReplicaFI(process, Replica):
-    # def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
-    #     # super().setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client)
-
-    #     self.failure_config = FailureConfig(failures =  [ 
-    #         Failure(src='_',dest='leader',msg_type=MsgType.Vote,round=1,prob=1,fail_type=FailType.Delay, val=0.1), 
-    #         Failure(src=2,dest='_',msg_type=MsgType.Wildcard,round=3,prob=0.5,fail_type=FailType.MsgLoss),  
-    #         Failure(src='leader',dest='_',msg_type=MsgType.Vote,round=3,prob=0.5,fail_type=FailType.SetAttr,val=2,attr='highest_vote_round')],seed = 12345678)
-
     def send(m, to):
-        # print("Seed Value = ", self.failure_config.seed)
-        # random.seed(self.failure_config.seed)
-        # i = random.randrage(0, 1)
         dont_send = False
         i = 0.6
         for fail_case in failure_config.failures:
