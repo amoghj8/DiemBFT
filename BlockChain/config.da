@@ -18,9 +18,9 @@ class FailType(Enum):
     Crash = 4
 
 ngst = 3000
-delta = 1
+delta = 0.25
 
-nclients = 3
+nclients = 1
 totreplicas = 4
 f = 1
 nreplicas = totreplicas - f

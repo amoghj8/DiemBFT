@@ -29,7 +29,6 @@ class Safety:
 
     def __safe_to_vote(self, block_round, qc_round, tc):
         if block_round <= max(self.__highest_vote_round, qc_round):
-            print("No.......")
             return False
         return (self.__consecutive(block_round, qc_round) or self.__safe_to_extend(block_round, qc_round, tc))
 
@@ -39,7 +38,6 @@ class Safety:
         return (self.__consecutive(round, qc_round) or self.__consecutive(round, tc.round))
 
     def __commit_state_id_candidate(self, block_round, qc):
-        # print("jbdvkbDVBVD", qc.vote_info.id)
         if(self.__consecutive(block_round, qc.vote_info.round)):
             return self.ledger.pending_state(qc.vote_info.id)
 
@@ -50,18 +48,17 @@ class Safety:
         self.__highest_vote_round = value
 
 
-    def make_vote(self, b, last_tc):
+    def make_vote(self, b, last_tc, leader, signature):
         qc_round = b.qc.vote_info.round
-        # print(last_tc.tmo_high_qc_rounds)
-        # if self.__safe_to_vote(b.round, qc_round, last_tc):
-        if True:
+        if self.__safe_to_vote(b.round, qc_round, last_tc):
+        # if True:
             self.__update_highest_qc_round(qc_round)
             self.__increase_highest_vote_round(b.round)
             # ledger_id = self.ledger.pending_state(b.id)
             vote_info = VoteInfo(b.id, b.round, b.qc.vote_info.id, qc_round, self.ledger.pending_state(b.id))
             vote_info_hash = self.hashIt( str(b.id) + str(b.round) + str(b.qc.vote_info.id) + str(qc_round) + str(self.ledger.pending_state(b.id)) )
             ledger_commit_info = LedgerCommitInfo(self.__commit_state_id_candidate(b.round, b.qc), vote_info_hash)
-            return VoteMsg(vote_info, ledger_commit_info, self.block_tree.high_commit_qc, 0, "sign") #need to change
+            return VoteMsg(vote_info, ledger_commit_info, self.block_tree.high_commit_qc, leader, str(signature)) #need to change
         return None
 
     def make_timeout(self, round, high_qc, last_tc):

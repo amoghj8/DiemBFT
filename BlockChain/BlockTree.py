@@ -52,7 +52,6 @@ class BlockTree:
 
     def execute_and_insert(self, b):
         # Sending block as ledger speculate function is expecting block
-        # print("current round = " + str(self.current_round))
         self.ledger.speculate(b)
         parentBlock = self.find_block(self.pending_block_tree, b.qc.vote_info.id)
         if(parentBlock is None):
@@ -66,7 +65,7 @@ class BlockTree:
         #Change to proper value of f
         #f = 1
         if (len(self.pending_votes[vote_idx]) == 2 * config.f + 1):
-            qc = QC(voteMessage.vote_info, self.pending_votes[vote_idx], leader, "Signature 1", voteMessage.ledger_commit_info)
+            qc = QC(voteMessage.vote_info, self.pending_votes[vote_idx], leader, str(self.signatures[leader]), voteMessage.ledger_commit_info)
             return qc
         return None
 

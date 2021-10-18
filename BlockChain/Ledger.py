@@ -53,10 +53,6 @@ class Ledger():
     def commit(self, block_id):
         if block_id in self.commited_blocks or block_id == "Genesis" or block_id == "Genesis-1":
             return
-        # lnode = self.getLedgerNode(self.prev_commit_id, self.root)
-        # print("**********************************************************")
-        # print("block_id = ", block_id)
-        # print("**********************************************************")
         self.getTransactions(self.root, block_id, [])
         self.root = self.getLedgerNode(block_id, self.root)
         self.mempool.commitTransactions(self.commited_blocks[block_id].txn_id)
@@ -101,7 +97,6 @@ class Ledger():
     Takes Block Id and returns the Ledger Node( Ledger State )
     """
     def getLedgerNode(self, id, lnode):
-        # print("lnode.block_id = ", lnode.block_id, ". id = ", id)
         if(lnode.block_id == id):
             return lnode 
         

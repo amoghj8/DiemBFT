@@ -43,13 +43,13 @@ class Client(process):
 
     def run():
         output("Client Spawned, id = ", self.client_id)
-        send_client_req_msg("test1", "0001",CLIENT_MESSAGE)
-        send_client_req_msg("test2", "0002",CLIENT_MESSAGE)
-        send_client_req_msg("test3", "0003",CLIENT_MESSAGE)
-        send_client_req_msg("test4", "0004",CLIENT_MESSAGE)
-        send_client_req_msg("test5", "0005",CLIENT_MESSAGE)
-        send_client_req_msg("test6", "0006",CLIENT_MESSAGE)
-        send_client_req_msg("test7", "0007",CLIENT_MESSAGE)
+        send_client_req_msg("test1" + str(self.client_id), "0001",CLIENT_MESSAGE)
+        send_client_req_msg("test2" + str(self.client_id), "0002",CLIENT_MESSAGE)
+        send_client_req_msg("test3" + str(self.client_id), "0003",CLIENT_MESSAGE)
+        send_client_req_msg("test4" + str(self.client_id), "0004",CLIENT_MESSAGE)
+        send_client_req_msg("test5" + str(self.client_id), "0005",CLIENT_MESSAGE)
+        send_client_req_msg("test6" + str(self.client_id), "0006",CLIENT_MESSAGE)
+        send_client_req_msg("test7" + str(self.client_id), "0007",CLIENT_MESSAGE)
          
         send_client_req_msg("Finish", "fin_txn_id", CLIENT_FIN_MESSAGE)
         await (len(clientDict) > 2)

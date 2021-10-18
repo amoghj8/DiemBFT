@@ -44,7 +44,6 @@ class LeaderElection:
         # if round in self.reputation_leaders:
         #     return self.reputation_leaders[round]
         # next_leader = self.count % len(self.validators)
-        # print("Leader = " + str(next_leader))
         # self.count += 1
         # return next_leader % len(self.validators)
         # return self.validators[math.floor(round / 2) % len(self.validators)]
