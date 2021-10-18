@@ -4,6 +4,7 @@ import QC
 import VoteInfo
 import unittest
 
+
 class TestBlockTreeMethods (unittest.TestCase):
 
     def test_constructor(self):

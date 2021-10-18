@@ -1,5 +1,8 @@
 from collections import defaultdict
 
+"""
+Block 
+"""
 class Block:
     def __init__(self, author, round, payload, qc, id, txn_id):
         self.author = author

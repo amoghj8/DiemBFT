@@ -1,3 +1,7 @@
+
+"""
+QC
+"""
 class QC:
     def __init__(self, vote_info, signatures, author, author_signature, ledger_commit_info = None):
         self.vote_info = vote_info

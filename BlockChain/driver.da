@@ -20,7 +20,9 @@ TIMEOUT_MESSAGE = "timeout_message"
 CLIENT_MESSAGE = "client_message"
 
 
-#Returns a list of  signing & verify keys of length count
+"""
+Generate signing and verify keys
+"""
 def generate_signing_and_verify_keys(count : int):
     signing_key_list, verify_key_list = [], []
     for _ in range(count):
@@ -29,12 +31,14 @@ def generate_signing_and_verify_keys(count : int):
         verify_key_list.append(sk.verify_key) #Public Key
     return signing_key_list, verify_key_list #Private Key, Public Key lists
 
-
+"""
+Main
+"""
 def main():
     clients = new(Client, num = config.nclients)
     replicas = new(Replica, num = config.nreplicas)
     faulty_replicas = new(ReplicaFI, num = config.nFreplicas)
-    
+
     signing_key_list_client, verify_key_list_client = generate_signing_and_verify_keys(config.nclients)
     signing_key_list_replica, verify_key_list_replica = generate_signing_and_verify_keys(config.nreplicas + config.nFreplicas)
 
@@ -61,13 +65,19 @@ def main():
         client_id_to_object[i] = client
 
     for i, replica in enumerate(replicas):
-        output(replicas)
+        output("Replicas", replicas)
         setup(replica, (i, client_id_to_object, replica_id_to_object, verify_key_list_replica[i], signing_key_list_replica[i], verify_key_list_replica, verify_key_list_client))
 
     for i, replica in enumerate(faulty_replicas):
+<<<<<<< HEAD
         output(faulty_replicas)
         setup(replica, (i + config.nreplicas, client_id_to_object, replica_id_to_object, verify_key_list_replica[i+config.nreplicas], signing_key_list_replica[i+config.nreplicas], verify_key_list_replica, verify_key_list_client))
     
+=======
+        output("Faulty replicas", faulty_replicas)
+        setup(replica, (i + nreplicas, client_id_to_object, replica_id_to_object, verify_key_list_replica[i+nreplicas], signing_key_list_replica[i+nreplicas], verify_key_list_replica, verify_key_list_client))
+
+>>>>>>> dba88258ae2b96801e10fbda5b0d4611fcbf1390
     start(replicas)
     start(faulty_replicas)
     start(clients)

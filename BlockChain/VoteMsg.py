@@ -1,3 +1,6 @@
+"""
+VoteMessage
+"""
 class VoteMsg:
     count = 0
     def __init__(self, vote_info, ledger_commit_info, high_commit_qc, sender, signature):

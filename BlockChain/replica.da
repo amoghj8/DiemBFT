@@ -37,8 +37,14 @@ CLIENT_FIN_MESSAGE = "client_fin_message"
 
 # ------------------------------------------------------
 
-class Replica(process):
 
+"""
+Replica
+"""
+class Replica(process):
+    """
+    Setup
+    """
     def setup(replica_id, clients, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
         self.log = self.Logger(str(replica_id) + str(datetime.timestamp(datetime.now())))
         self.run_done = False
@@ -51,8 +57,11 @@ class Replica(process):
         self.leader_election = LeaderElection(replicas, 3, 3, replicas, self.ledger, self.block_tree, self.log)
         self.safety = Safety(self.signing_key, verify_key_list_replica, self.ledger, self.block_tree, self.log)
 
+    """
+    Run
+    """
     def run():
-        print("Replica Spawned, id = ", self.replica_id)
+        self.log.debug("Replica Spawned, id = ", self.replica_id)
         # while not self.run_done or len(self.mempool) > 0:
         while not self.run_done or self.mem_pool.exists():
             self.round_done = False
@@ -70,32 +79,45 @@ class Replica(process):
             elif timeout(timer_duration):
                 self.PaceMaker_local_timeout_round()
 
+    """
+    Send acknowledgement
+    """
     def send_ack(txn_to_commit):
         clientId =  int(txn_to_commit.split(',')[0])
         txnID = str(txn_to_commit.split(',')[1])
+        self.log.debug('sending acknowledgement to client for transaction id', txnID)
         send((txnID), to = self.clients[clientId])
 
+    """
+    Setting attribute with values
+    """
     def setattr(attr,val):
         if attr == "current_round":
             self.block_tree.current_round = val
         elif attr == "highest_vote_round":
             self.safety.set_highest_vote_round(val)
+        self.log.debug('Set attributes with required values')
 
+    """
+    Process QC certificate
+    """
     def process_certificate_qc(qc : QC):
         self.block_tree.process_qc(qc)
         self.leader_election.update_leaders(qc)
         self.PaceMaker_advance_round_qc(qc)
+        self.log.debug('Processed QC certificate')
 
-
+    """
+    Process Proposal Message
+    """
     def process_proposal_msg(P : ProposalMsg):
+        self.log.debug('Processing proposal message')
         self.process_certificate_qc(P.block.qc)
         self.process_certificate_qc(P.high_commit_qc)
         self.PaceMaker_advance_round_tc(P.last_round_tc)
         round = self.block_tree.current_round
         leader = self.leader_election.get_leader(round)
         self.mem_pool.processTransaction(P.block.txn_id)
-
-
         self.block_tree.execute_and_insert(P.block)
         vote_msg = self.safety.make_vote(P.block, P.last_round_tc, self.replica_id, self.verify_key)
 
@@ -106,7 +128,11 @@ class Replica(process):
             send((MsgType.Vote, vote_msg), to = self.replicas[next_leader])
             pass
 
+    """
+    Processing Timeout Message
+    """
     def process_timeout_msg(M : TimeoutMsg):
+        self.log.debug('Processing timeout message')
         self.process_certificate_qc(M.tmo_info.high_qc)
         self.process_certificate_qc(M.high_commit_qc)
         self.PaceMaker_advance_round_tc(M.last_round_tc)
@@ -115,21 +141,31 @@ class Replica(process):
             self.PaceMaker_advance_round_tc(tc)
             self.process_new_round_event(tc)
 
+    """
+    Processing vote message
+    """
     def process_vote_msg(M: VoteMsg):
+        self.log.debug('Processing vote message')
         qc = self.block_tree.process_vote(M, self.replica_id)
         if qc != None:
             self.process_certificate_qc(qc)
             self.process_new_round_event(None)
 
-    #Sign a message str using a signing key
+    """
+    Signing the message
+    """
     def sign_message(message, signing_key):
         #Encode the message
         message = pickle.dumps(message)
         #Sign the message and return the signed message
+        self.log.debug('Signed the message')
         return signing_key.sign(message)
 
-
+    """
+    Processing new round event
+    """
     def process_new_round_event(last_tc: TC):
+        self.log.debug('Processing new round event')
         u = self.leader_election.get_leader(self.block_tree.current_round)
         if u != None and u == replica_id:
             if self.mem_pool.exists():
@@ -137,26 +173,27 @@ class Replica(process):
                 b = self.block_tree.generate_block(txn, self.block_tree.current_round, txn_id)
                 proposal_msg_p = ProposalMsg(b, last_tc, self.block_tree.high_commit_qc, verify_key_list_replica[replica_id])
                 # proposal_msg_p = self.sign_message(proposal_msg_p, self.signing_key)
-                print("sending proposal message ")
+                self.log.debug("sending proposal message ")
                 send((MsgType.Proposal, proposal_msg_p), to = replicas.values())
 
 
-    #Handler for messages from other Replicas
+    """
+    Handler for messages from other Replicas
+    """
     def receive(msg=(message_type, message_object), from_ = replica):
 
         if message_type == MsgType.Proposal:
-            print("processing proposal message")
             self.process_proposal_msg(message_object)
 
         elif message_type == MsgType.Vote:
-            print("processing vote message")
             self.process_vote_msg(message_object)
 
         elif message_type == MsgType.TimeOut:
-            print("processing timeout message")
             self.process_timeout_msg(message_object)
 
-    #Handler for client message
+    """
+    Handler for client message
+    """
     def receive(msg=(msg_type, client_message), from_ = clients):
         if(msg_type == CLIENT_FIN_MESSAGE):
             self.run_done = True
@@ -167,68 +204,69 @@ class Replica(process):
             client_verify_key = verify_key_list_client[client_id]
             client_msg = verify_and_get_signed_message(client_message.signed_message, client_verify_key)
             self.mem_pool.addTransaction(str(client_id) + ',' + str(txn_id), client_msg)
-            print("added transaction ", str(client_id) + ',' + str(txn_id))
+            self.log.debug("added transaction ", str(client_id) + ',' + str(txn_id))
 
 
-    #Verifies the signed message and returns the message
+    """
+    Verifies the signed message and returns the message
+    """
     def verify_and_get_signed_message(signed_message : str, verify_key : nacl.signing.VerifyKey):
+        self.log.debug('Verifying signed message')
         verify_key.verify(signed_message)
         return signed_message.message.decode('ascii')
 
 
-
-    # set based on the config
+    """
+    Get round timer
+    """
     def PaceMaker_get_round_timer(r = None):
         delta = 1              # Todo - fetch from config
         return 4 * delta
 
-    # Not required
+    """
+    Pacemaker Start timer
+    """
     def PaceMaker_start_timer(new_round):
         self.round_done = True  # stop_timer(self.current_round)
         self.block_tree.current_round = new_round
 
-    # Function to be triggered on Timeout
+    """
+    Function to be triggered on Timeout
+    """
     def PaceMaker_local_timeout_round():
         timeout_info = self.safety.make_timeout(self.block_tree.current_round, self.block_tree.high_qc, self.last_round_tc)
         if(self.block_tree.current_round == 0):
             #Send TC Anyway
             pass
         tmoMsg = TimeoutMsg(timeout_info, self.last_round_tc, self.block_tree.high_commit_qc)
-        print("sending timeout message")
+        self.log.debug("sending timeout message")
         send((MsgType.TimeOut, tmoMsg), to = replicas.values())
 
 
-
-    # TimeoutMsg Handler======================================================================
     def PaceMaker_process_remote_timeout(tmo):
-
+    """
+    TimeoutMsg Handler
+    """
         tmo_info = tmo.tmo_info
         if tmo_info.round < self.block_tree.current_round:
             return None
-
         lst_sender = [tmo_v.sender for tmo_v in self.pending_timeouts[tmo_info.round]]
-
         if tmo_info.sender not in lst_sender:
             self.pending_timeouts[tmo_info.round].append(tmo_info)
             lst_sender.append(tmo_info.sender)
-
         if len(lst_sender) == f+1:
             # stop_timer(self.current_round)
             self.round_done = True
             self.PaceMaker_local_timeout_round()
-
-
         lst_high_qc_round = [tmo_v.high_qc for tmo_v in self.pending_timeouts[tmo_info.round]]
         lst_signature     = [tmo_v.signature for tmo_v in self.pending_timeouts[tmo_info.round]]
-
         if len(lst_sender) == 2*f+1:
             return TC(tmo_info.round, lst_high_qc_round, lst_signature)
-
         return None
-    # =============================================================================================
 
-
-
+    """
+    """
+    Pacemaker advance round TC
     def PaceMaker_advance_round_tc(tc):
         if tc == None or tc.round < self.block_tree.current_round:
             return False
@@ -236,6 +274,9 @@ class Replica(process):
         self.PaceMaker_start_timer(tc.round + 1)
         return True
 
+    """
+    Pacemaker advance round QC
+    """
     def PaceMaker_advance_round_qc(qc):
         if qc.vote_info.round < self.block_tree.current_round:
             return False
@@ -244,8 +285,11 @@ class Replica(process):
         return True
 
 
+    """
+    Creating a Logger
+    """
     def Logger(file_name):
-        logging.basicConfig(filename=file_name,
+        logging.basicConfig(filename=str(file_name) + '.log',
                             filemode='a',
                             format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                             datefmt='%H:%M:%S',
@@ -259,7 +303,9 @@ class Replica(process):
 
 # ----------------------------------------- End of Replica Class -------------------------------
 
-
+"""
+Replica Fault Injection Class
+"""
 class ReplicaFI(process, Replica):
     def send(m, to):
         dont_send = False

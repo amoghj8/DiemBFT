@@ -20,6 +20,9 @@ TIMEOUT_MESSAGE = "timeout_message"
 CLIENT_MESSAGE = "client_message"
 CLIENT_FIN_MESSAGE = "client_fin_message"
 
+"""
+Client Message
+"""
 class ClientMessage:
     id : int
     txn_id: str
@@ -32,11 +35,21 @@ class ClientMessage:
         self.txn_id = txn_id
         self.signed_message = signed_message
 
+"""
+Client
+"""
 class Client(process):
+
+    """
+    Setup
+    """
     def setup(client_id, clientDict, replicas, verify_key, signing_key, verify_key_list_replica):
         output("Setup of client completed", level=logging.DEBUG)
         pass
 
+    """
+    Sending client request message
+    """
     def send_client_req_msg(msg : str, txn_id : str, type : str):
         signed_msg_to_send = sign_message(msg, self.signing_key)
         client_message = ClientMessage(self.client_id, type, txn_id, signed_msg_to_send)
@@ -44,8 +57,11 @@ class Client(process):
         send((type, client_message), to = replicas)
         clientDict[txn_id] = client_message
 
-
+    """
+    Run
+    """
     def run():
+<<<<<<< HEAD
         n = config.nbr_request
         for i in range(0, n):
             message = "test_" + str(i) + "_" + str(self.client_id)
@@ -55,15 +71,31 @@ class Client(process):
         send_client_req_msg("Dummy", "d0000001",CLIENT_MESSAGE)
         send_client_req_msg("Dummy", "d0000002",CLIENT_MESSAGE)
          
+=======
+        output("Client Spawned, id = ", self.client_id)
+        send_client_req_msg("test1" + str(self.client_id), "0001",CLIENT_MESSAGE)
+        send_client_req_msg("test2" + str(self.client_id), "0002",CLIENT_MESSAGE)
+        send_client_req_msg("test3" + str(self.client_id), "0003",CLIENT_MESSAGE)
+        send_client_req_msg("test4" + str(self.client_id), "0004",CLIENT_MESSAGE)
+        send_client_req_msg("test5" + str(self.client_id), "0005",CLIENT_MESSAGE)
+        send_client_req_msg("test6" + str(self.client_id), "0006",CLIENT_MESSAGE)
+        send_client_req_msg("test7" + str(self.client_id), "0007",CLIENT_MESSAGE)
+
+>>>>>>> dba88258ae2b96801e10fbda5b0d4611fcbf1390
         send_client_req_msg("Finish", "fin_txn_id", CLIENT_FIN_MESSAGE)
         await (len(clientDict) > 2)
 
+    """
+    Receive
+    """
     def receive(msg=(txnId), from_ = replica):
         output("received transaction id", txnId, "from replica ", replica, level=logging.INFO)
         if txnId in self.clientDict.keys():
             del self.clientDict[txnId]
 
-    #Sign a message str using a signing key
+    """
+    Signing message
+    """
     def sign_message(message : str, signing_key : nacl.signing.SigningKey):
         #Encode the message
         message = message.encode('ascii')

@@ -1,3 +1,6 @@
+"""
+Timeout Info
+"""
 class TimeoutInfo:
     def __init__(self, round, high_qc, sender, signature):
         self.round = round
