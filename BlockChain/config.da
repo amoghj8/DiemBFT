@@ -17,15 +17,17 @@ class FailType(Enum):
     SetAttr = 3
     Crash = 4
 
-nclients = 1
-nreplicas = 10
 ngst = 3000
 delta = 1
-f = 3
-nFreplicas = 0
 
-failure_config = FailureConfig(failures =  [ 
-            Failure(src='_',dest='leader',msg_type=MsgType.Vote,round=1,prob=1,fail_type=FailType.Delay, val=0.1), 
-            Failure(src=2,dest='_',msg_type=MsgType.Wildcard,round=3,prob=0.5,fail_type=FailType.MsgLoss),  
-            Failure(src='leader',dest='_',msg_type=MsgType.Vote,round=3,prob=0.5,fail_type=FailType.SetAttr,val=2,attr='highest_vote_round')]
-        ,seed = 12345678)
+nclients = 1
+totreplicas = 4
+f = 1
+nreplicas = totreplicas - f
+nFreplicas = f
+
+# failure_config = FailureConfig(failures =  [ 
+#             Failure(src='_',dest='leader',msg_type=MsgType.Vote,round=1,prob=1,fail_type=FailType.Delay, val=0.1), 
+#             Failure(src=2,dest='_',msg_type=MsgType.Wildcard,round=3,prob=0.5,fail_type=FailType.MsgLoss),  
+#             Failure(src='leader',dest='_',msg_type=MsgType.Vote,round=3,prob=0.5,fail_type=FailType.SetAttr,val=2,attr='highest_vote_round')]
+#         ,seed = 12345678)

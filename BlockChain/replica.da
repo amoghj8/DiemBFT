@@ -24,8 +24,8 @@ import logging
 import logging.config
 from config import FailType
 
-# from config import *
-from config_1 import *
+from config import *
+# from config_1 import *
 
 
 # PROPOSAL_MESSAGE = "proposal_message"
@@ -131,7 +131,7 @@ class Replica(process):
 
     def process_vote_msg(M: VoteMsg):
         M = pickle.loads(M)
-        qc = self.block_tree.process_vote(M)
+        qc = self.block_tree.process_vote(M, self.replica_id)
         if qc != None:
             self.process_certificate_qc(qc)
             self.process_new_round_event(None)
@@ -285,26 +285,29 @@ class Replica(process):
 
 class ReplicaFI(process, Replica):
     def send(m, to):
-        dont_send = False
-        i = 0.6
-        for fail_case in failure_config.failures:
-            if (( fail_case.src is None or fail_case.src == self.replica_id or fail_case.src == '_') and \
-                ( fail_case.msg_tye is None or fail_case.msg_type == m[0] or fail_case.msg_type ==  MsgType.Wildcard ) and \
-                ( fail_case.round is None or fail_case.round == self.block_tree.current_round ) and 
-                ( fail_case is None or fail_case.prob >= i ) ):
-                pass
-                # if fail_case.dest not in to:
-                #     continue
-                if fail_case.fail_type == FailType.MsgLoss:
-                    dont_send = True
-                elif fail_case.fail_type == FailType.Delay:
-                    time.sleep(4)
-                elif fail_case.fail_type == FailType.SetAttr:
-                    setattr(fail_case.attr, fail_case.val)
-                elif fail_case.fail_type == FailType.Crash:
-                    dont_send = True
+        print("ggggggggggggggggggggggggggggggggggggggggggggggggg")
+        pass
+        # dont_send = False
+        # i = 0.6
+        # for fail_case in failure_config.failures:
+        #     if (( fail_case.src is None or fail_case.src == self.replica_id or fail_case.src == '_') and \
+        #         ( fail_case.msg_tye is None or fail_case.msg_type == m[0] or fail_case.msg_type ==  MsgType.Wildcard ) and \
+        #         ( fail_case.round is None or fail_case.round == self.block_tree.current_round ) and 
+        #         ( fail_case is None or fail_case.prob >= i ) ):
+        #         pass
+        #         # if fail_case.dest not in to:
+        #         #     continue
+        #         if fail_case.fail_type == FailType.MsgLoss:
+        #             dont_send = True
+        #         elif fail_case.fail_type == FailType.Delay:
+        #             time.sleep(4)
+        #         elif fail_case.fail_type == FailType.SetAttr:
+        #             setattr(fail_case.attr, fail_case.val)
+        #         elif fail_case.fail_type == FailType.Crash:
+        #             print("Dooooooooooooooooooont Seeeeeeeeeeeeeeeeeeeeeend")
+        #             dont_send = True
 
-        if not dont_send:
-            super().send(m,to)
+        # if not dont_send:
+        #     super().send(m,to)
 
     

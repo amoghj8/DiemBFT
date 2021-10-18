@@ -17,12 +17,16 @@ class FailType(Enum):
     SetAttr = 3
     Crash = 4
 
-nclients = 1
-nreplicas = 10
 ngst = 3000
 delta = 1
-f = 3
-nFreplicas = 0
+
+nclients = 1
+totreplicas = 4
+f = 1
+nreplicas = totreplicas - f
+nFreplicas = f
+
+
 failure_config = FailureConfig(failures =  [ 
             Failure(src='_',dest='_',msg_type=MsgType.Wildcard,round=None,prob=1,fail_type=FailType.Crash, val=None, attr=None)]
         ,seed = 12345678)

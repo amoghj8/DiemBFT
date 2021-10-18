@@ -59,14 +59,14 @@ class BlockTree:
             parentBlock = self.pending_block_tree
         parentBlock.children.append(b)
 
-    def process_vote(self, voteMessage):
+    def process_vote(self, voteMessage, leader):
         self.process_qc(voteMessage.high_commit_qc)
         vote_idx = self.hashIt(  str(voteMessage.ledger_commit_info.vote_info_hash) + str(voteMessage.ledger_commit_info.commit_state_id))
         self.pending_votes[vote_idx].append(voteMessage.signature)
         #Change to proper value of f
         #f = 1
         if (len(self.pending_votes[vote_idx]) == 2 * config.f + 1):
-            qc = QC(voteMessage.vote_info, self.pending_votes[vote_idx], "Author 1", "Signature 1", voteMessage.ledger_commit_info)
+            qc = QC(voteMessage.vote_info, self.pending_votes[vote_idx], leader, "Signature 1", voteMessage.ledger_commit_info)
             return qc
         return None
 
