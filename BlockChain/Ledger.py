@@ -4,6 +4,7 @@ import Block
 import QC
 import Ledger
 import hashlib
+import logging
 
 class Ledger():
     """Ledger Module"""
@@ -35,6 +36,7 @@ class Ledger():
         ledgerNode = LedgerNode(blk.id, node.id, blk.payload) # curr_node.id = Previous Level Ledger State Id for new Ledger Node
         node.children.append(ledgerNode)
         self.pending_blocks[blk.id] = blk
+        print("New ledger state ", ledgerNode.id)
         return ledgerNode.id
 
     
@@ -86,6 +88,7 @@ class Ledger():
             for val in lst:
                 if val.block_id == "Genesis" or  val.block_id == "Genesis-1" or val.block_id in self.commited_blocks: #and val.parent_id == -1:
                     continue # genesis Block
+                print("writing to file ", val.txns)
                 self.file.write(val.txns + "\n")
 
                 if val.block_id in self.pending_blocks:

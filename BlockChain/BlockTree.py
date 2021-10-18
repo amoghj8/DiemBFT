@@ -4,6 +4,7 @@ from QC import QC
 from Ledger import Ledger
 import hashlib
 import config
+import logging
 
 from VoteInfo import VoteInfo
 from collections import defaultdict

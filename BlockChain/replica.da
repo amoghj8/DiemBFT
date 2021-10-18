@@ -21,7 +21,7 @@ from ProposalMsg import ProposalMsg
 
 import pickle
 import logging
-import logging.config
+import config
 from config import FailType
 
 from config import *
@@ -62,21 +62,17 @@ class Replica(process):
         # self.log = self.Logger(file_name)
 
     def run():
-        output("Replica Spawned, id = ", self.replica_id)
+        print("Replica Spawned, id = ", self.replica_id)
         # while not self.run_done or len(self.mempool) > 0:
         while not self.run_done or self.mem_pool.exists():
             self.round_done = False
             timer_duration = self.PaceMaker_get_round_timer()
             x = self.mem_pool.committed_transactions.keys()
-            output("XXXX", x)
             y = self.mem_pool.acknowledged_transactions.keys()
-            output("YYYY", y)
             txn_to_ack = list(x - y)
             if len(txn_to_ack) > 0:
                 if self.replica_id == self.leader_election.get_leader(self.block_tree.current_round):
                     txn_to_ack = txn_to_ack[0]
-                    output("Keyssssssssssss", txn_to_ack)
-                    output("Valueess", self.mem_pool.committed_transactions[txn_to_ack])
                     self.mem_pool.acknowledged_transactions[txn_to_ack] = self.mem_pool.committed_transactions[txn_to_ack]
                     send_ack(str(txn_to_ack))
             if await(self.round_done == True) : 
@@ -85,20 +81,16 @@ class Replica(process):
                 self.PaceMaker_local_timeout_round()
 
     def send_ack(txn_to_commit):
-        output("TXNS ::: :: ", txn_to_commit)
         clientId =  int(txn_to_commit.split(',')[0])
         txnID = str(txn_to_commit.split(',')[1])
-        output("DSDSDSDSDDSSSDSDSDDS", len(self.clients))
         send((txnID), to = self.clients[clientId])
-        output("After send")
-
+        
     def setattr(attr,val):
         if attr == "current_round":
             self.block_tree.current_round = val
         elif attr == "highest_vote_round":
             self.safety.set_highest_vote_round(val)
         
-
     def process_certificate_qc(qc : QC):
         self.block_tree.process_qc(qc)
         self.leader_election.update_leaders(qc)
@@ -116,7 +108,6 @@ class Replica(process):
 
         self.block_tree.execute_and_insert(P.block)
         vote_msg = self.safety.make_vote(P.block, P.last_round_tc, self.replica_id, self.verify_key)
-        vote_msg = pickle.dumps(vote_msg)
       
         if (vote_msg != None):
             #send vote msg to LeaderElection.get leader(current round+ 1)
@@ -135,16 +126,15 @@ class Replica(process):
             self.process_new_round_event(tc)
 
     def process_vote_msg(M: VoteMsg):
-        M = pickle.loads(M)
         qc = self.block_tree.process_vote(M, self.replica_id)
         if qc != None:
             self.process_certificate_qc(qc)
             self.process_new_round_event(None)
 
     #Sign a message str using a signing key
-    def sign_message(message : str, signing_key : nacl.signing.SigningKey):
+    def sign_message(message, signing_key):
         #Encode the message
-        message = message.encode('ascii')
+        message = pickle.dumps(message)
         #Sign the message and return the signed message
         return signing_key.sign(message)
 
@@ -156,6 +146,8 @@ class Replica(process):
                 (txn_id, txn) = self.mem_pool.getTransactions()
                 b = self.block_tree.generate_block(txn, self.block_tree.current_round, txn_id)
                 proposal_msg_p = ProposalMsg(b, last_tc, self.block_tree.high_commit_qc, verify_key_list_replica[replica_id])
+                # proposal_msg_p = self.sign_message(proposal_msg_p, self.signing_key)
+                print("sending proposal message ")
                 send((MsgType.Proposal, proposal_msg_p), to = replicas.values())
 
 
@@ -163,12 +155,15 @@ class Replica(process):
     def receive(msg=(message_type, message_object), from_ = replica):
         
         if message_type == MsgType.Proposal:
+            print("processing proposal message")
             self.process_proposal_msg(message_object)
 
         elif message_type == MsgType.Vote:
+            print("processing vote message")
             self.process_vote_msg(message_object)
 
         elif message_type == MsgType.TimeOut:
+            print("processing timeout message")
             self.process_timeout_msg(message_object)
 
     #Handler for client message
@@ -182,6 +177,8 @@ class Replica(process):
             client_verify_key = verify_key_list_client[client_id]
             client_msg = verify_and_get_signed_message(client_message.signed_message, client_verify_key)
             self.mem_pool.addTransaction(str(client_id) + ',' + str(txn_id), client_msg)
+            print("added transaction ", str(client_id) + ',' + str(txn_id))
+
 
     #Verifies the signed message and returns the message
     def verify_and_get_signed_message(signed_message : str, verify_key : nacl.signing.VerifyKey):
@@ -207,6 +204,7 @@ class Replica(process):
             #Send TC Anyway
             pass
         tmoMsg = TimeoutMsg(timeout_info, self.last_round_tc, self.block_tree.high_commit_qc)
+        print("sending timeout message")
         send((MsgType.TimeOut, tmoMsg), to = replicas.values())
 
     
@@ -297,4 +295,5 @@ class ReplicaFI(process, Replica):
         # if not dont_send:
         #     super().send(m,to)
 
-    
+    # def send(m, [to, id]):
+    #     pass

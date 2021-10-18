@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import logging
 
 class Mempool:
     def __init__(self):
@@ -19,6 +20,7 @@ class Mempool:
     def addTransaction(self, key, val):
         if key not in self.initial_transactions and key not in self.committed_transactions and key not in self.pending_transactions:
             self.initial_transactions[key] = val
+            print("setting initial transaction with key", key, " and value", val)
             return True
         return False
     
@@ -32,6 +34,7 @@ class Mempool:
             first_key = next(iter(self.initial_transactions))
             value = self.initial_transactions[first_key]
             self.pending_transactions[first_key] = value
+            print("setting pending transaction with key ", first_key, "and value", self.pending_transactions[first_key])
             del self.initial_transactions[first_key]
             return (first_key, value)
         else: return None
@@ -44,6 +47,7 @@ class Mempool:
     def commitTransactions(self, key):
         if key in self.initial_transactions:
             self.committed_transactions[key] = self.initial_transactions[key]
+            print("committed transaction with key ", key, "and value", self.initial_transactions[key])
             del self.initial_transactions[key]
 
         if key in self.pending_transactions:
@@ -58,6 +62,7 @@ class Mempool:
     def processTransaction(self, key):
         if key in self.initial_transactions:
             self.pending_transactions[key] = self.initial_transactions[key]
+            print("moving transaction to pending queue with key ", key, "and value", self.pending_transactions[key])
             del self.initial_transactions[key]
     
     """
@@ -65,4 +70,5 @@ class Mempool:
     """
     def removePendingTransaction(self, key):
         if key in self.pending_transactions:
+            print("removing peding transaction with key ", key)
             del self.pending_transactions[key]

@@ -1,5 +1,6 @@
 import sys
 import nacl.bindings
+import logging
 from nacl.signing import SigningKey
 
 from BlockTree import BlockTree
@@ -32,11 +33,13 @@ class ClientMessage:
 
 class Client(process):
     def setup(client_id, clientDict, replicas, verify_key, signing_key, verify_key_list_replica):
+        output("Setup of client completed", level=logging.DEBUG)
         pass
 
     def send_client_req_msg(msg : str, txn_id : str, type : str):
         signed_msg_to_send = sign_message(msg, self.signing_key)
         client_message = ClientMessage(self.client_id, type, txn_id, signed_msg_to_send)
+        #output("sending client message", client_message, "to", replicas, level=logging.INFO)
         send((type, client_message), to = replicas)
         clientDict[txn_id] = client_message
 
@@ -55,6 +58,7 @@ class Client(process):
         await (len(clientDict) > 2)
 
     def receive(msg=(txnId), from_ = replica):
+        output("received transaction id", txnId, "from replica ", replica, level=logging.INFO)
         if txnId in self.clientDict.keys():
             del self.clientDict[txnId]
 
