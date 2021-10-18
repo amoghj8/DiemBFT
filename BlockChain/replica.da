@@ -61,7 +61,7 @@ class Replica(process):
     Run
     """
     def run():
-        self.log.debug("Replica Spawned, id = ", self.replica_id)
+        self.log.debug("Replica Spawned")
         # while not self.run_done or len(self.mempool) > 0:
         while not self.run_done or self.mem_pool.exists():
             self.round_done = False
@@ -85,7 +85,7 @@ class Replica(process):
     def send_ack(txn_to_commit):
         clientId =  int(txn_to_commit.split(',')[0])
         txnID = str(txn_to_commit.split(',')[1])
-        self.log.debug('sending acknowledgement to client for transaction id', txnID)
+        self.log.debug('sending acknowledgement to client for transaction id')
         send((txnID), to = self.clients[clientId])
 
     """
@@ -204,7 +204,7 @@ class Replica(process):
             client_verify_key = verify_key_list_client[client_id]
             client_msg = verify_and_get_signed_message(client_message.signed_message, client_verify_key)
             self.mem_pool.addTransaction(str(client_id) + ',' + str(txn_id), client_msg)
-            self.log.debug("added transaction ", str(client_id) + ',' + str(txn_id))
+            self.log.debug("added transaction ")
 
 
     """
@@ -242,11 +242,10 @@ class Replica(process):
         self.log.debug("sending timeout message")
         send((MsgType.TimeOut, tmoMsg), to = replicas.values())
 
-
-    def PaceMaker_process_remote_timeout(tmo):
     """
     TimeoutMsg Handler
     """
+    def PaceMaker_process_remote_timeout(tmo):
         tmo_info = tmo.tmo_info
         if tmo_info.round < self.block_tree.current_round:
             return None
@@ -265,8 +264,9 @@ class Replica(process):
         return None
 
     """
-    """
+
     Pacemaker advance round TC
+    """
     def PaceMaker_advance_round_tc(tc):
         if tc == None or tc.round < self.block_tree.current_round:
             return False

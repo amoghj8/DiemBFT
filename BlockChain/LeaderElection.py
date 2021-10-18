@@ -60,7 +60,7 @@ class LeaderElection:
     Get leader
     """
     def get_leader(self, round):
-        self.logger.debug('new leader is ', round % len(self.validators))
+        self.logger.debug('new leader is ')
         return round % len(self.validators)
         # if round in self.reputation_leaders:
         #     return self.reputation_leaders[round]

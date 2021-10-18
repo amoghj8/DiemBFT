@@ -37,7 +37,7 @@ class Ledger():
         ledgerNode = LedgerNode(blk.id, node.id, blk.payload) # curr_node.id = Previous Level Ledger State Id for new Ledger Node
         node.children.append(ledgerNode)
         self.pending_blocks[blk.id] = blk
-        self.logger.debug("New ledger state ", ledgerNode.id)
+        self.logger.debug("New ledger state ")
         return ledgerNode.id
 
 
@@ -45,7 +45,7 @@ class Ledger():
     Return the Ledger State of the associated Block Id
     """
     def pending_state(self, block_id):
-        self.logger.debug('Leadger state is ', self.getLedgerNode(block_id, self.root).id)
+        self.logger.debug('Leadger state is ')
         return self.getLedgerNode(block_id, self.root).id
 
 

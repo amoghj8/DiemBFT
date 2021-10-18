@@ -104,7 +104,7 @@ class BlockTree:
     Finding block
     """
     def find_block(self, node, id):
-        self.logger.debug('Searching block with id', id)
+        self.logger.debug('Searching block with id')
         if(node.id == id):
             return node
         for child in node.children:
