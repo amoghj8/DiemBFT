@@ -1,5 +1,7 @@
 import TimeoutInfo
-
+"""
+Timeout Message
+"""
 class TimeoutMsg:
     count = 0
     def __init__(self, tmo_info, last_round_tc, high_commit_qc):

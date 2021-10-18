@@ -4,6 +4,9 @@ from collections import namedtuple
 FailureConfig = namedtuple('FailureConfig', ['failures', 'seed'], defaults=(None, [None, None]))
 Failure = namedtuple('Failure', ['src', 'dest', 'msg_type', 'round', 'prob', 'fail_type', 'val', 'attr'], defaults=(None,[None, None, None, None, None, None, None, None]))
 
+"""
+MessageType Enum
+"""
 class MsgType(Enum):
     Proposal = 1
     QC = 2
@@ -11,6 +14,9 @@ class MsgType(Enum):
     Vote = 4
     Wildcard = 5
 
+"""
+FailType Enum
+"""
 class FailType(Enum):
     MsgLoss = 1
     Delay = 2
@@ -26,7 +32,6 @@ f = 1
 nreplicas = totreplicas - f
 nFreplicas = f
 
-
-failure_config = FailureConfig(failures =  [ 
+failure_config = FailureConfig(failures =  [
             Failure(src='_',dest='_',msg_type=MsgType.Wildcard,round=None,prob=1,fail_type=FailType.Crash, val=None, attr=None)]
         ,seed = 12345678)

@@ -37,7 +37,7 @@ class Ledger():
         ledgerNode = LedgerNode(blk.id, node.id, blk.payload) # curr_node.id = Previous Level Ledger State Id for new Ledger Node
         node.children.append(ledgerNode)
         self.pending_blocks[blk.id] = blk
-        print("New ledger state ", ledgerNode.id)
+        self.logger.debug("New ledger state ", ledgerNode.id)
         return ledgerNode.id
 
 
@@ -45,6 +45,7 @@ class Ledger():
     Return the Ledger State of the associated Block Id
     """
     def pending_state(self, block_id):
+        self.logger.debug('Leadger state is ', self.getLedgerNode(block_id, self.root).id)
         return self.getLedgerNode(block_id, self.root).id
 
 
@@ -59,7 +60,7 @@ class Ledger():
         self.getTransactions(self.root, block_id, [])
         self.root = self.getLedgerNode(block_id, self.root)
         self.mempool.commitTransactions(self.commited_blocks[block_id].txn_id)
-
+        self.logger.debug('Committing transactions')
 
     """
     Returns The Block that was recently commited
@@ -95,7 +96,6 @@ class Ledger():
                 if val.block_id in self.pending_blocks:
                     self.commited_blocks[val.block_id] = self.pending_blocks[val.block_id]
                     del self.pending_blocks[val.block_id]
-
 
     """
     Takes Block Id and returns the Ledger Node( Ledger State )

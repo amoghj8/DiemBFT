@@ -2,6 +2,9 @@ import QC
 import Block
 import TC
 
+"""
+Proposal
+"""
 class ProposalMsg:
     count = 0
     def __init__(self, block, last_round_tc, high_commit_qc, signature):
