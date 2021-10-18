@@ -3,12 +3,13 @@ from LedgerCommitInfo import LedgerCommitInfo
 from QC import QC
 from Ledger import Ledger
 import hashlib
+import config
 
 from VoteInfo import VoteInfo
 from collections import defaultdict
 
 class BlockTree:
-    
+
     def __init__(self, ledger, replica_id, signatures):
         self.pending_votes = defaultdict(list)
         ledger_commit_info = LedgerCommitInfo("state_id", "hash")
@@ -57,14 +58,14 @@ class BlockTree:
         if(parentBlock is None):
             parentBlock = self.pending_block_tree
         parentBlock.children.append(b)
-        
+
     def process_vote(self, voteMessage):
         self.process_qc(voteMessage.high_commit_qc)
         vote_idx = self.hashIt(  str(voteMessage.ledger_commit_info.vote_info_hash) + str(voteMessage.ledger_commit_info.commit_state_id))
         self.pending_votes[vote_idx].append(voteMessage.signature)
         #Change to proper value of f
-        f = 1
-        if (len(self.pending_votes[vote_idx]) == 2 * f + 1):
+        #f = 1
+        if (len(self.pending_votes[vote_idx]) == 2 * config.f + 1):
             qc = QC(voteMessage.vote_info, self.pending_votes[vote_idx], "Author 1", "Signature 1", voteMessage.ledger_commit_info)
             return qc
         return None

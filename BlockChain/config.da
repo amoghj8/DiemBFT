@@ -1,0 +1,5 @@
+nclients = 3
+nreplicas = 10
+ngst = 3000
+delta = 1
+f = 1

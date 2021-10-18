@@ -22,6 +22,7 @@ from ProposalMsg import ProposalMsg
 import pickle
 import logging
 import logging.config
+import config
 
 # PROPOSAL_MESSAGE = "proposal_message"
 # VOTE_MESSAGE = "vote_message"
@@ -62,7 +63,7 @@ class Replica(process):
         while not self.run_done or self.mem_pool.exists():
             self.round_done = False
             timer_duration = self.PaceMaker_get_round_timer()
-            if await(self.round_done == True) : 
+            if await(self.round_done == True) :
                 pass
             elif timeout(timer_duration):
                 self.PaceMaker_local_timeout_round()
@@ -73,14 +74,14 @@ class Replica(process):
             self.block_tree.current_round = val
         elif attr == "highest_vote_round":
             self.safety.set_highest_vote_round(val)
-        
+
 
     def process_certificate_qc(qc : QC):
         self.block_tree.process_qc(qc)
         self.leader_election.update_leaders(qc)
         self.PaceMaker_advance_round_qc(qc)
 
-        
+
     def process_proposal_msg(P : ProposalMsg):
         self.process_certificate_qc(P.block.qc)
         self.process_certificate_qc(P.high_commit_qc)
@@ -99,7 +100,7 @@ class Replica(process):
         # print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
         # if (P.block.round == round and P.block.author == leader):
         #     return
-        
+
 
         self.block_tree.execute_and_insert(P.block)
         vote_msg = self.safety.make_vote(P.block, P.last_round_tc)
@@ -156,7 +157,7 @@ class Replica(process):
 
     #Handler for messages from other Replicas
     def receive(msg=(message_type, message_object), from_ = replica):
-        
+
         if message_type == MsgType.Proposal:
             print(replica_id, "Received Proposal Message ***********************")
             self.process_proposal_msg(message_object)
@@ -191,14 +192,14 @@ class Replica(process):
 
     # set based on the config
     def PaceMaker_get_round_timer(r = None):
-        delta = 1              # Todo - fetch from config
-        return 4 * delta
-    
+        #delta = 1              # Todo - fetch from config
+        return 4 * config.delta
+
     # Not required
     def PaceMaker_start_timer(new_round):
         self.round_done = True  # stop_timer(self.current_round)
         self.block_tree.current_round = new_round
-        
+
     # Function to be triggered on Timeout
     def PaceMaker_local_timeout_round():
         timeout_info = self.safety.make_timeout(self.block_tree.current_round, self.block_tree.high_qc, self.last_round_tc)
@@ -208,11 +209,11 @@ class Replica(process):
         tmoMsg = TimeoutMsg(timeout_info, self.last_round_tc, self.block_tree.high_commit_qc)
         send((MsgType.TimeOut, tmoMsg), to = replicas.values())
 
-    
+
 
     # TimeoutMsg Handler======================================================================
     def PaceMaker_process_remote_timeout(tmo):
-        
+
         tmo_info = tmo.tmo_info
         if tmo_info.round < self.block_tree.current_round:
             print("tmo_info.round = ", tmo_info.round, "  self.block_tree.current_round ", self.block_tree.current_round)
@@ -225,8 +226,8 @@ class Replica(process):
             lst_sender.append(tmo_info.sender)
 
         # Todo - read f from config
-        f = 1
-        if len(lst_sender) == f+1:
+        #f = 1
+        if len(lst_sender) == config.f+1:
             # stop_timer(self.current_round)
             self.round_done = True # Todo - Not sure if we shld stop timer
             print("Nooooooooooooooooooooooooooooooooooooooooooo")
@@ -286,9 +287,9 @@ class ReplicaFI(process, Replica):
     def setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client):
         super().setup(replica_id, replicas, verify_key, signing_key, verify_key_list_replica, verify_key_list_client)
 
-        self.failure_config = FailureConfig(failures =  [ 
-            Failure(src='_',dest='leader',msg_type=MsgType.Vote,round=1,prob=1,fail_type=FailType.Delay, val=0.1), 
-            Failure(src=2,dest='_',msg_type=MsgType.Wildcard,round=3,prob=0.5,fail_type=FailType.MsgLoss),  
+        self.failure_config = FailureConfig(failures =  [
+            Failure(src='_',dest='leader',msg_type=MsgType.Vote,round=1,prob=1,fail_type=FailType.Delay, val=0.1),
+            Failure(src=2,dest='_',msg_type=MsgType.Wildcard,round=3,prob=0.5,fail_type=FailType.MsgLoss),
             Failure(src='leader',dest='_',msg_type=MsgType.Vote,round=3,prob=0.5,fail_type=FailType.SetAttr,val=2,attr='highest_vote_round')],seed = 12345678)
 
     def send(m, to):

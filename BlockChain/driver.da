@@ -6,6 +6,7 @@ from LeaderElection import LeaderElection
 from Safety import Safety
 from client import *
 from replica import *
+import config
 
 from QC import QC
 
@@ -30,16 +31,13 @@ def generate_signing_and_verify_keys(count : int):
 
 
 def main():
-    nclients = int(sys.argv[1]) if len(sys.argv) > 1 else 3
-    nreplicas = int(sys.argv[2]) if len(sys.argv) > 2 else 10
-    ngst = 3000
 
-    clients = new(Client, num = nclients)
-    replicas = new(Replica, num = nreplicas)
+    clients = new(Client, num = config.nclients)
+    replicas = new(Replica, num = config.nreplicas)
 
     signing_key_list_client, verify_key_list_client = generate_signing_and_verify_keys(nclients)
     signing_key_list_replica, verify_key_list_replica = generate_signing_and_verify_keys(nreplicas)
-    
+
     output("client length " , len(clients))
     output("replica length " , len(replicas))
 
@@ -57,6 +55,6 @@ def main():
         output("######################")
         output(replicas)
         setup(replica, (i, replica_id_to_object, verify_key_list_replica[i], signing_key_list_replica[i], verify_key_list_replica, verify_key_list_client))
-    
+
     start(replicas)
     start(clients)
