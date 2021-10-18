@@ -31,13 +31,15 @@ class ClientMessage:
         self.signed_message = signed_message
 
 class Client(process):
-    def setup(client_id, replicas, verify_key, signing_key, verify_key_list_replica):
+    def setup(client_id, clientDict, replicas, verify_key, signing_key, verify_key_list_replica):
         pass
 
     def send_client_req_msg(msg : str, txn_id : str, type : str):
         signed_msg_to_send = sign_message(msg, self.signing_key)
         client_message = ClientMessage(self.client_id, type, txn_id, signed_msg_to_send)
         send((type, client_message), to = replicas)
+        clientDict[txn_id] = client_message
+
 
     def run():
         output("Client Spawned, id = ", self.client_id)
@@ -50,7 +52,11 @@ class Client(process):
         send_client_req_msg("test7", "0007",CLIENT_MESSAGE)
          
         send_client_req_msg("Finish", "fin_txn_id", CLIENT_FIN_MESSAGE)
+        await (len(clientDict) > 2)
 
+    def receive(msg=(txnId), from_ = replica):
+        if txnId in self.clientDict.keys():
+            del self.clientDict[txnId]
 
     #Sign a message str using a signing key
     def sign_message(message : str, signing_key : nacl.signing.SigningKey):
