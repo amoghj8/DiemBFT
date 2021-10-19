@@ -1,0 +1,44 @@
+from enum import Enum
+from collections import namedtuple
+
+FailureConfig = namedtuple('FailureConfig', ['failures', 'seed'], defaults=(None, [None, None]))
+Failure = namedtuple('Failure', ['src', 'dest', 'msg_type', 'round', 'prob', 'fail_type', 'val', 'attr'], defaults=(None,[None, None, None, None, None, None, None, None]))
+
+"""
+MessageType Enum
+"""
+class MsgType(Enum):
+    Proposal = 1
+    QC = 2
+    TimeOut = 3
+    Vote = 4
+    Wildcard = 5
+
+"""
+FailType Enum
+"""    
+class FailType(Enum):
+    MsgLoss = 1
+    Delay = 2
+    SetAttr = 3
+    Crash = 4
+
+ngst = 3000
+delta = 0.25
+
+nclients = 1
+totreplicas = 4
+f = 1
+nreplicas = totreplicas - f
+nFreplicas = f
+
+nbr_request = 10
+# failure_config = FailureConfig(failures =  [ 
+#             Failure(src='_',dest='leader',msg_type=MsgType.Vote,round=1,prob=1,fail_type=FailType.Delay, val=0.1), 
+#             Failure(src=2,dest='_',msg_type=MsgType.Wildcard,round=3,prob=0.5,fail_type=FailType.MsgLoss),  
+#             Failure(src='leader',dest='_',msg_type=MsgType.Vote,round=3,prob=0.5,fail_type=FailType.SetAttr,val=2,attr='highest_vote_round')]
+#         ,seed = 12345678)
+
+failure_config = FailureConfig(failures =  [ 
+            Failure(src='_',dest='_',msg_type=MsgType.Wildcard,round=None,prob=1,fail_type=FailType.Crash, val=None, attr=None)]
+        ,seed = 12345678)

@@ -1,0 +1,95 @@
+import sys
+import nacl.bindings
+import logging
+from nacl.signing import SigningKey
+
+from BlockTree import BlockTree
+from LeaderElection import LeaderElection
+from Safety import Safety
+
+from QC import QC
+
+from TimeoutMsg import TimeoutMsg
+from ProposalMsg import ProposalMsg
+import config
+
+LOCAL_TIMEOUT = "local_timeout"
+PROPOSAL_MESSAGE = "proposal_message"
+VOTE_MESSAGE = "vote_message"
+TIMEOUT_MESSAGE = "timeout_message"
+CLIENT_MESSAGE = "client_message"
+CLIENT_FIN_MESSAGE = "client_fin_message"
+
+"""
+Client Message
+"""
+class ClientMessage:
+    id : int
+    txn_id: str
+    type : str
+    signed_message : nacl.signing.SignedMessage
+
+    def __init__(self, id, type, txn_id, signed_message):
+        self.id = id
+        self.type = type
+        self.txn_id = txn_id
+        self.signed_message = signed_message
+
+"""
+Client
+"""
+class Client(process):
+
+    """
+    Setup
+    """
+    def setup(client_id, clientDict, replicas, verify_key, signing_key, verify_key_list_replica, number_of_requests):
+        output("Setup of client completed", level=logging.DEBUG)
+        self.acknowledge_tx = {}
+        pass
+
+    """
+    Sending client request message
+    """
+    def send_client_req_msg(msg : str, txn_id : str, type : str):
+        signed_msg_to_send = sign_message(msg, self.signing_key)
+        client_message = ClientMessage(self.client_id, type, txn_id, signed_msg_to_send)
+        #output("sending client message", client_message, "to", replicas, level=logging.INFO)
+        send((type, client_message), to = replicas)
+        clientDict[txn_id] = client_message
+        self.received_fin = False
+
+    """
+    Run
+    """
+    def run():
+        for i in range(0, self.number_of_requests):
+            message = "test_" + str(i) + "_" + str(self.client_id)
+            transaction_id = "000" + str(i)
+            send_client_req_msg(message, transaction_id,CLIENT_MESSAGE)
+
+        send_client_req_msg("Dummy", "d0000001",CLIENT_MESSAGE)
+        send_client_req_msg("Dummy", "d0000002",CLIENT_MESSAGE)
+         
+        send_client_req_msg("Finish", "fin_txn_id", CLIENT_FIN_MESSAGE)
+        await ( len(clientDict) - len(acknowledge_tx) > 2 )
+
+    """
+    Receive
+    """
+    def receive(msg=(txnId), from_ = replicas):
+        output("received transaction id", txnId, "from replica ", replicas, level=logging.INFO)
+        if txnId == "FIN":
+            self.received_fin = True
+        elif txnId not in self.acknowledge_tx.keys():
+            self.acknowledge_tx[txnId] = 1
+
+    
+    """
+    Signing message
+    """
+    def sign_message(message : str, signing_key : nacl.signing.SigningKey):
+        #Encode the message
+        message = message.encode('ascii')
+        #Sign the message and return the signed message
+        return signing_key.sign(message)

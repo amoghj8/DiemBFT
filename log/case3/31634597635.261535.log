@@ -1,0 +1,639 @@
+18:53:55,262 root INFO Logger object created successfully..
+18:53:55,262 root DEBUG Mempool init complete
+18:53:55,262 root DEBUG Ledger module init complete
+18:53:55,262 root DEBUG BlockTree init complete
+18:53:55,262 root DEBUG LeaderElection init complete
+18:53:55,262 root DEBUG Safety module init complete
+18:53:55,267 root DEBUG Replica Spawned
+18:53:55,272 root DEBUG Verifying signed message
+18:53:55,273 root DEBUG Transaction added to mempool
+18:53:55,274 root DEBUG Verifying signed message
+18:53:55,274 root DEBUG Transaction added to mempool
+18:53:55,275 root DEBUG Verifying signed message
+18:53:55,275 root DEBUG Transaction added to mempool
+18:53:55,277 root DEBUG Verifying signed message
+18:53:55,277 root DEBUG Transaction added to mempool
+18:53:55,279 root DEBUG Verifying signed message
+18:53:55,280 root DEBUG Transaction added to mempool
+18:53:55,280 root DEBUG Verifying signed message
+18:53:55,285 root DEBUG Transaction added to mempool
+18:53:55,286 root DEBUG Verifying signed message
+18:53:55,287 root DEBUG Transaction added to mempool
+18:53:55,288 root DEBUG Verifying signed message
+18:53:55,288 root DEBUG Transaction added to mempool
+18:53:55,288 root DEBUG Verifying signed message
+18:53:55,289 root DEBUG Transaction added to mempool
+18:53:55,289 root DEBUG Verifying signed message
+18:53:55,289 root DEBUG Transaction added to mempool
+18:53:55,289 root DEBUG Verifying signed message
+18:53:55,290 root DEBUG Transaction added to mempool
+18:53:55,290 root DEBUG Verifying signed message
+18:53:55,290 root DEBUG Transaction added to mempool
+18:53:56,268 root DEBUG sending timeout message
+18:54:00,276 root DEBUG Processing timeout message
+18:54:00,276 root DEBUG Processing QC from sender 
+18:54:00,276 root DEBUG updating leaders
+18:54:00,276 root DEBUG Processed QC certificate
+18:54:00,277 root DEBUG Processing QC from sender 
+18:54:00,277 root DEBUG updating leaders
+18:54:00,277 root DEBUG Processed QC certificate
+18:54:00,278 root DEBUG Processing timeout message
+18:54:00,278 root DEBUG Processing QC from sender 
+18:54:00,278 root DEBUG updating leaders
+18:54:00,279 root DEBUG Processed QC certificate
+18:54:00,279 root DEBUG Processing QC from sender 
+18:54:00,279 root DEBUG updating leaders
+18:54:00,279 root DEBUG Processed QC certificate
+18:54:00,279 root DEBUG sending timeout message
+18:54:04,285 root DEBUG Processing timeout message
+18:54:04,286 root DEBUG Processing QC from sender 
+18:54:04,286 root DEBUG updating leaders
+18:54:04,286 root DEBUG Processed QC certificate
+18:54:04,286 root DEBUG Processing QC from sender 
+18:54:04,286 root DEBUG updating leaders
+18:54:04,286 root DEBUG Processed QC certificate
+18:54:04,286 root DEBUG Processing new round event
+18:54:04,287 root DEBUG new leader is 
+18:54:04,288 root DEBUG Processing timeout message
+18:54:04,288 root DEBUG Processing QC from sender 
+18:54:04,288 root DEBUG updating leaders
+18:54:04,288 root DEBUG Processed QC certificate
+18:54:04,288 root DEBUG Processing QC from sender 
+18:54:04,288 root DEBUG updating leaders
+18:54:04,289 root DEBUG Processed QC certificate
+18:54:04,289 root DEBUG Processing timeout message
+18:54:04,290 root DEBUG Processing QC from sender 
+18:54:04,290 root DEBUG updating leaders
+18:54:04,290 root DEBUG Processed QC certificate
+18:54:04,290 root DEBUG Processing QC from sender 
+18:54:04,290 root DEBUG updating leaders
+18:54:04,290 root DEBUG Processed QC certificate
+18:54:04,291 root DEBUG Processing timeout message
+18:54:04,291 root DEBUG Processing QC from sender 
+18:54:04,292 root DEBUG updating leaders
+18:54:04,292 root DEBUG Processed QC certificate
+18:54:04,292 root DEBUG Processing QC from sender 
+18:54:04,292 root DEBUG updating leaders
+18:54:04,292 root DEBUG Processed QC certificate
+18:54:04,294 root DEBUG Processing proposal messagef23f8a5833a0c4d787288c570b413de2666d82c28eaeb278ab3f1cfe53adc893
+18:54:04,294 root DEBUG Processing QC from sender 
+18:54:04,294 root DEBUG updating leaders
+18:54:04,294 root DEBUG Processed QC certificate
+18:54:04,294 root DEBUG Processing QC from sender 
+18:54:04,294 root DEBUG updating leaders
+18:54:04,294 root DEBUG Processed QC certificate
+18:54:04,294 root DEBUG new leader is 
+18:54:04,295 root DEBUG New ledger state 
+18:54:04,295 root DEBUG Searching block with id
+18:54:04,295 root DEBUG Inserting block
+18:54:04,295 root DEBUG Leadger state is 
+18:54:04,295 root DEBUG Leadger state is 
+18:54:04,296 root DEBUG new leader is 
+18:54:08,302 root DEBUG Processing proposal message2acbc3ffb3c166ee68eb7f460d6c88ca6fbc0bb6a33f8b74333e0497aa16ff0a
+18:54:08,303 root DEBUG Processing QC from sender 
+18:54:08,303 root DEBUG updating leaders
+18:54:08,303 root DEBUG Processed QC certificate
+18:54:08,303 root DEBUG Processing QC from sender 
+18:54:08,303 root DEBUG updating leaders
+18:54:08,303 root DEBUG Processed QC certificate
+18:54:08,303 root DEBUG new leader is 
+18:54:08,303 root DEBUG New ledger state 
+18:54:08,304 root DEBUG Searching block with id
+18:54:08,304 root DEBUG Searching block with id
+18:54:08,304 root DEBUG Inserting block
+18:54:08,305 root DEBUG Leadger state is 
+18:54:08,305 root DEBUG Leadger state is 
+18:54:08,305 root DEBUG Leadger state is 
+18:54:08,305 root DEBUG new leader is 
+18:54:12,309 root DEBUG Processing vote message
+18:54:12,309 root DEBUG Processing vote
+18:54:12,310 root DEBUG Processing QC from sender 
+18:54:12,311 root DEBUG Processing vote message
+18:54:12,312 root DEBUG Processing vote
+18:54:12,312 root DEBUG Processing QC from sender 
+18:54:12,313 root DEBUG Processing vote message
+18:54:12,313 root DEBUG Processing vote
+18:54:12,314 root DEBUG Processing QC from sender 
+18:54:12,314 root DEBUG Processing QC from sender 
+18:54:12,315 root DEBUG Committing transactions
+18:54:12,316 root DEBUG updating leaders
+18:54:12,317 root DEBUG Processed QC certificate
+18:54:12,318 root DEBUG Processing new round event
+18:54:12,318 root DEBUG new leader is 
+18:54:12,318 root DEBUG Generating block
+18:54:12,318 root DEBUG sending proposal message 
+18:54:16,325 root DEBUG Processing timeout message
+18:54:16,325 root DEBUG Processing QC from sender 
+18:54:16,325 root DEBUG updating leaders
+18:54:16,325 root DEBUG Processed QC certificate
+18:54:16,326 root DEBUG Processing QC from sender 
+18:54:16,326 root DEBUG updating leaders
+18:54:16,326 root DEBUG Processed QC certificate
+18:54:16,326 root DEBUG Processing timeout message
+18:54:16,326 root DEBUG Processing QC from sender 
+18:54:16,326 root DEBUG updating leaders
+18:54:16,326 root DEBUG Processed QC certificate
+18:54:16,326 root DEBUG Processing QC from sender 
+18:54:16,327 root DEBUG updating leaders
+18:54:16,327 root DEBUG Processed QC certificate
+18:54:16,327 root DEBUG Processing timeout message
+18:54:16,327 root DEBUG Processing QC from sender 
+18:54:16,327 root DEBUG updating leaders
+18:54:16,328 root DEBUG Processed QC certificate
+18:54:16,328 root DEBUG Processing QC from sender 
+18:54:16,328 root DEBUG updating leaders
+18:54:16,328 root DEBUG Processed QC certificate
+18:54:16,328 root DEBUG Processing timeout message
+18:54:16,328 root DEBUG Processing QC from sender 
+18:54:16,328 root DEBUG updating leaders
+18:54:16,329 root DEBUG Processed QC certificate
+18:54:16,329 root DEBUG Processing QC from sender 
+18:54:16,329 root DEBUG updating leaders
+18:54:16,329 root DEBUG Processed QC certificate
+18:54:16,330 root DEBUG Processing timeout message
+18:54:16,330 root DEBUG Processing QC from sender 
+18:54:16,330 root DEBUG updating leaders
+18:54:16,330 root DEBUG Processed QC certificate
+18:54:16,330 root DEBUG Processing QC from sender 
+18:54:16,330 root DEBUG updating leaders
+18:54:16,330 root DEBUG Processed QC certificate
+18:54:16,331 root DEBUG Processing timeout message
+18:54:16,331 root DEBUG Processing QC from sender 
+18:54:16,331 root DEBUG updating leaders
+18:54:16,331 root DEBUG Processed QC certificate
+18:54:16,331 root DEBUG Processing QC from sender 
+18:54:16,331 root DEBUG updating leaders
+18:54:16,331 root DEBUG Processed QC certificate
+18:54:16,332 root DEBUG Processing timeout message
+18:54:16,333 root DEBUG Processing QC from sender 
+18:54:16,333 root DEBUG updating leaders
+18:54:16,333 root DEBUG Processed QC certificate
+18:54:16,333 root DEBUG Processing QC from sender 
+18:54:16,333 root DEBUG updating leaders
+18:54:16,333 root DEBUG Processed QC certificate
+18:54:16,334 root DEBUG Processing timeout message
+18:54:16,334 root DEBUG Processing QC from sender 
+18:54:16,334 root DEBUG updating leaders
+18:54:16,334 root DEBUG Processed QC certificate
+18:54:16,334 root DEBUG Processing QC from sender 
+18:54:16,334 root DEBUG updating leaders
+18:54:16,334 root DEBUG Processed QC certificate
+18:54:16,334 root DEBUG sending timeout message
+18:54:20,339 root DEBUG Processing timeout message
+18:54:20,339 root DEBUG Processing QC from sender 
+18:54:20,339 root DEBUG updating leaders
+18:54:20,339 root DEBUG Processed QC certificate
+18:54:20,340 root DEBUG Processing QC from sender 
+18:54:20,340 root DEBUG updating leaders
+18:54:20,340 root DEBUG Processed QC certificate
+18:54:20,340 root DEBUG Processing new round event
+18:54:20,340 root DEBUG new leader is 
+18:54:20,342 root DEBUG Processing timeout message
+18:54:20,343 root DEBUG Processing QC from sender 
+18:54:20,343 root DEBUG updating leaders
+18:54:20,343 root DEBUG Processed QC certificate
+18:54:20,343 root DEBUG Processing QC from sender 
+18:54:20,343 root DEBUG updating leaders
+18:54:20,343 root DEBUG Processed QC certificate
+18:54:20,344 root DEBUG Processing timeout message
+18:54:20,344 root DEBUG Processing QC from sender 
+18:54:20,345 root DEBUG updating leaders
+18:54:20,345 root DEBUG Processed QC certificate
+18:54:20,345 root DEBUG Processing QC from sender 
+18:54:20,345 root DEBUG updating leaders
+18:54:20,345 root DEBUG Processed QC certificate
+18:54:20,347 root DEBUG Processing timeout message
+18:54:20,347 root DEBUG Processing QC from sender 
+18:54:20,347 root DEBUG updating leaders
+18:54:20,347 root DEBUG Processed QC certificate
+18:54:20,347 root DEBUG Processing QC from sender 
+18:54:20,347 root DEBUG updating leaders
+18:54:20,347 root DEBUG Processed QC certificate
+18:54:20,349 root DEBUG Processing proposal messagef9eac4bb1aa00c5576d589122ad742209c586af6ab3b1bdd47ab22f169787041
+18:54:20,349 root DEBUG Processing QC from sender 
+18:54:20,349 root DEBUG updating leaders
+18:54:20,350 root DEBUG Processed QC certificate
+18:54:20,350 root DEBUG Processing QC from sender 
+18:54:20,350 root DEBUG updating leaders
+18:54:20,350 root DEBUG Processed QC certificate
+18:54:20,350 root DEBUG new leader is 
+18:54:20,350 root DEBUG New ledger state 
+18:54:20,350 root DEBUG Searching block with id
+18:54:20,350 root DEBUG Searching block with id
+18:54:20,350 root DEBUG Searching block with id
+18:54:20,350 root DEBUG Inserting block
+18:54:20,350 root DEBUG Leadger state is 
+18:54:20,350 root DEBUG Leadger state is 
+18:54:20,350 root DEBUG new leader is 
+18:54:24,353 root DEBUG Processing proposal message167c8ac52bee04847fa9be7dfc2feb06917319286655b93d30b4851e30631eff
+18:54:24,353 root DEBUG Processing QC from sender 
+18:54:24,353 root DEBUG updating leaders
+18:54:24,353 root DEBUG Processed QC certificate
+18:54:24,354 root DEBUG Processing QC from sender 
+18:54:24,354 root DEBUG updating leaders
+18:54:24,354 root DEBUG Processed QC certificate
+18:54:24,354 root DEBUG new leader is 
+18:54:24,354 root DEBUG New ledger state 
+18:54:24,354 root DEBUG Searching block with id
+18:54:24,354 root DEBUG Searching block with id
+18:54:24,354 root DEBUG Searching block with id
+18:54:24,354 root DEBUG Searching block with id
+18:54:24,354 root DEBUG Inserting block
+18:54:24,354 root DEBUG Leadger state is 
+18:54:24,354 root DEBUG Leadger state is 
+18:54:24,355 root DEBUG Leadger state is 
+18:54:24,355 root DEBUG new leader is 
+18:54:28,361 root DEBUG Processing proposal messageeed8a5a9880d0e1e17c27512b3fa1bcd777e72dcce8d04a3b220d1437df6ec54
+18:54:28,362 root DEBUG Processing QC from sender 
+18:54:28,362 root DEBUG Committing transactions
+18:54:28,362 root DEBUG updating leaders
+18:54:28,362 root DEBUG Processed QC certificate
+18:54:28,363 root DEBUG Processing QC from sender 
+18:54:28,363 root DEBUG updating leaders
+18:54:28,363 root DEBUG Processed QC certificate
+18:54:28,364 root DEBUG new leader is 
+18:54:28,364 root DEBUG New ledger state 
+18:54:28,364 root DEBUG Searching block with id
+18:54:28,365 root DEBUG Searching block with id
+18:54:28,365 root DEBUG Searching block with id
+18:54:28,365 root DEBUG Searching block with id
+18:54:28,365 root DEBUG Searching block with id
+18:54:28,365 root DEBUG Inserting block
+18:54:28,365 root DEBUG Leadger state is 
+18:54:28,365 root DEBUG Leadger state is 
+18:54:28,365 root DEBUG Leadger state is 
+18:54:28,365 root DEBUG new leader is 
+18:54:32,369 root DEBUG Processing vote message
+18:54:32,369 root DEBUG Processing vote
+18:54:32,369 root DEBUG Processing QC from sender 
+18:54:32,370 root DEBUG Processing vote message
+18:54:32,371 root DEBUG Processing vote
+18:54:32,371 root DEBUG Processing QC from sender 
+18:54:32,373 root DEBUG Processing vote message
+18:54:32,373 root DEBUG Processing vote
+18:54:32,373 root DEBUG Processing QC from sender 
+18:54:32,373 root DEBUG Processing QC from sender 
+18:54:32,374 root DEBUG Committing transactions
+18:54:32,374 root DEBUG updating leaders
+18:54:32,374 root DEBUG Processed QC certificate
+18:54:32,374 root DEBUG Processing new round event
+18:54:32,374 root DEBUG new leader is 
+18:54:32,374 root DEBUG Generating block
+18:54:32,374 root DEBUG sending proposal message 
+18:54:36,379 root DEBUG Processing timeout message
+18:54:36,380 root DEBUG Processing QC from sender 
+18:54:36,380 root DEBUG updating leaders
+18:54:36,380 root DEBUG Processed QC certificate
+18:54:36,380 root DEBUG Processing QC from sender 
+18:54:36,381 root DEBUG updating leaders
+18:54:36,381 root DEBUG Processed QC certificate
+18:54:36,382 root DEBUG Processing timeout message
+18:54:36,382 root DEBUG Processing QC from sender 
+18:54:36,382 root DEBUG updating leaders
+18:54:36,382 root DEBUG Processed QC certificate
+18:54:36,382 root DEBUG Processing QC from sender 
+18:54:36,383 root DEBUG updating leaders
+18:54:36,383 root DEBUG Processed QC certificate
+18:54:36,383 root DEBUG Processing timeout message
+18:54:36,384 root DEBUG Processing QC from sender 
+18:54:36,384 root DEBUG updating leaders
+18:54:36,384 root DEBUG Processed QC certificate
+18:54:36,384 root DEBUG Processing QC from sender 
+18:54:36,384 root DEBUG updating leaders
+18:54:36,385 root DEBUG Processed QC certificate
+18:54:36,385 root DEBUG Processing timeout message
+18:54:36,386 root DEBUG Processing QC from sender 
+18:54:36,386 root DEBUG updating leaders
+18:54:36,386 root DEBUG Processed QC certificate
+18:54:36,386 root DEBUG Processing QC from sender 
+18:54:36,386 root DEBUG updating leaders
+18:54:36,386 root DEBUG Processed QC certificate
+18:54:36,387 root DEBUG Processing timeout message
+18:54:36,387 root DEBUG Processing QC from sender 
+18:54:36,387 root DEBUG updating leaders
+18:54:36,387 root DEBUG Processed QC certificate
+18:54:36,387 root DEBUG Processing QC from sender 
+18:54:36,387 root DEBUG updating leaders
+18:54:36,387 root DEBUG Processed QC certificate
+18:54:36,388 root DEBUG Processing timeout message
+18:54:36,388 root DEBUG Processing QC from sender 
+18:54:36,388 root DEBUG updating leaders
+18:54:36,388 root DEBUG Processed QC certificate
+18:54:36,388 root DEBUG Processing QC from sender 
+18:54:36,388 root DEBUG updating leaders
+18:54:36,388 root DEBUG Processed QC certificate
+18:54:36,389 root DEBUG Processing timeout message
+18:54:36,389 root DEBUG Processing QC from sender 
+18:54:36,389 root DEBUG updating leaders
+18:54:36,389 root DEBUG Processed QC certificate
+18:54:36,389 root DEBUG Processing QC from sender 
+18:54:36,390 root DEBUG updating leaders
+18:54:36,390 root DEBUG Processed QC certificate
+18:54:36,391 root DEBUG Processing timeout message
+18:54:36,391 root DEBUG Processing QC from sender 
+18:54:36,392 root DEBUG updating leaders
+18:54:36,392 root DEBUG Processed QC certificate
+18:54:36,392 root DEBUG Processing QC from sender 
+18:54:36,392 root DEBUG updating leaders
+18:54:36,392 root DEBUG Processed QC certificate
+18:54:36,393 root DEBUG Processing timeout message
+18:54:36,393 root DEBUG Processing QC from sender 
+18:54:36,393 root DEBUG updating leaders
+18:54:36,393 root DEBUG Processed QC certificate
+18:54:36,393 root DEBUG Processing QC from sender 
+18:54:36,393 root DEBUG updating leaders
+18:54:36,393 root DEBUG Processed QC certificate
+18:54:36,393 root DEBUG sending timeout message
+18:54:40,399 root DEBUG Processing timeout message
+18:54:40,399 root DEBUG Processing QC from sender 
+18:54:40,400 root DEBUG updating leaders
+18:54:40,400 root DEBUG Processed QC certificate
+18:54:40,400 root DEBUG Processing QC from sender 
+18:54:40,400 root DEBUG updating leaders
+18:54:40,400 root DEBUG Processed QC certificate
+18:54:40,400 root DEBUG Processing new round event
+18:54:40,400 root DEBUG new leader is 
+18:54:40,401 root DEBUG Processing timeout message
+18:54:40,402 root DEBUG Processing QC from sender 
+18:54:40,402 root DEBUG updating leaders
+18:54:40,402 root DEBUG Processed QC certificate
+18:54:40,402 root DEBUG Processing QC from sender 
+18:54:40,402 root DEBUG updating leaders
+18:54:40,402 root DEBUG Processed QC certificate
+18:54:40,403 root DEBUG Processing timeout message
+18:54:40,403 root DEBUG Processing QC from sender 
+18:54:40,403 root DEBUG updating leaders
+18:54:40,403 root DEBUG Processed QC certificate
+18:54:40,403 root DEBUG Processing QC from sender 
+18:54:40,404 root DEBUG updating leaders
+18:54:40,404 root DEBUG Processed QC certificate
+18:54:40,405 root DEBUG Processing timeout message
+18:54:40,405 root DEBUG Processing QC from sender 
+18:54:40,405 root DEBUG updating leaders
+18:54:40,405 root DEBUG Processed QC certificate
+18:54:40,405 root DEBUG Processing QC from sender 
+18:54:40,405 root DEBUG updating leaders
+18:54:40,405 root DEBUG Processed QC certificate
+18:54:40,406 root DEBUG Processing timeout message
+18:54:40,406 root DEBUG Processing QC from sender 
+18:54:40,406 root DEBUG updating leaders
+18:54:40,406 root DEBUG Processed QC certificate
+18:54:40,406 root DEBUG Processing QC from sender 
+18:54:40,406 root DEBUG updating leaders
+18:54:40,406 root DEBUG Processed QC certificate
+18:54:40,406 root DEBUG Processing proposal messagee2e01bd769c3df635230654e17f49c1f951ef3d63b047d727649d512e19beb12
+18:54:40,407 root DEBUG Processing QC from sender 
+18:54:40,407 root DEBUG updating leaders
+18:54:40,407 root DEBUG Processed QC certificate
+18:54:40,407 root DEBUG Processing QC from sender 
+18:54:40,407 root DEBUG updating leaders
+18:54:40,407 root DEBUG Processed QC certificate
+18:54:40,407 root DEBUG new leader is 
+18:54:40,407 root DEBUG New ledger state 
+18:54:40,407 root DEBUG Searching block with id
+18:54:40,407 root DEBUG Searching block with id
+18:54:40,407 root DEBUG Searching block with id
+18:54:40,407 root DEBUG Searching block with id
+18:54:40,407 root DEBUG Searching block with id
+18:54:40,407 root DEBUG Searching block with id
+18:54:40,407 root DEBUG Inserting block
+18:54:40,407 root DEBUG Leadger state is 
+18:54:40,407 root DEBUG Leadger state is 
+18:54:40,408 root DEBUG new leader is 
+18:54:44,409 root DEBUG Processing proposal message95d41a72547d3f1c36a80b6b95f43d4f97fa04c4cb0e671aba3a4f8288a63908
+18:54:44,409 root DEBUG Processing QC from sender 
+18:54:44,409 root DEBUG updating leaders
+18:54:44,409 root DEBUG Processed QC certificate
+18:54:44,409 root DEBUG Processing QC from sender 
+18:54:44,410 root DEBUG updating leaders
+18:54:44,410 root DEBUG Processed QC certificate
+18:54:44,410 root DEBUG new leader is 
+18:54:44,410 root DEBUG New ledger state 
+18:54:44,410 root DEBUG Searching block with id
+18:54:44,411 root DEBUG Searching block with id
+18:54:44,411 root DEBUG Searching block with id
+18:54:44,411 root DEBUG Searching block with id
+18:54:44,411 root DEBUG Searching block with id
+18:54:44,411 root DEBUG Searching block with id
+18:54:44,411 root DEBUG Searching block with id
+18:54:44,411 root DEBUG Inserting block
+18:54:44,412 root DEBUG Leadger state is 
+18:54:44,412 root DEBUG Leadger state is 
+18:54:44,412 root DEBUG Leadger state is 
+18:54:44,412 root DEBUG new leader is 
+18:54:48,417 root DEBUG Processing proposal message90e6b320278bddf8e3bb775ac51fbf2fb79571feab98a58429a06579cd55e3f9
+18:54:48,417 root DEBUG Processing QC from sender 
+18:54:48,418 root DEBUG Committing transactions
+18:54:48,418 root DEBUG updating leaders
+18:54:48,418 root DEBUG Processed QC certificate
+18:54:48,418 root DEBUG Processing QC from sender 
+18:54:48,418 root DEBUG updating leaders
+18:54:48,419 root DEBUG Processed QC certificate
+18:54:48,419 root DEBUG new leader is 
+18:54:48,419 root DEBUG New ledger state 
+18:54:48,419 root DEBUG Searching block with id
+18:54:48,420 root DEBUG Searching block with id
+18:54:48,420 root DEBUG Searching block with id
+18:54:48,420 root DEBUG Searching block with id
+18:54:48,420 root DEBUG Searching block with id
+18:54:48,420 root DEBUG Searching block with id
+18:54:48,420 root DEBUG Searching block with id
+18:54:48,421 root DEBUG Searching block with id
+18:54:48,421 root DEBUG Inserting block
+18:54:48,421 root DEBUG Leadger state is 
+18:54:48,421 root DEBUG Leadger state is 
+18:54:48,421 root DEBUG Leadger state is 
+18:54:48,421 root DEBUG new leader is 
+18:54:52,426 root DEBUG Processing vote message
+18:54:52,427 root DEBUG Processing vote
+18:54:52,427 root DEBUG Processing QC from sender 
+18:54:52,428 root DEBUG Processing vote message
+18:54:52,429 root DEBUG Processing vote
+18:54:52,429 root DEBUG Processing QC from sender 
+18:54:52,430 root DEBUG Processing vote message
+18:54:52,430 root DEBUG Processing vote
+18:54:52,430 root DEBUG Processing QC from sender 
+18:54:52,430 root DEBUG Processing QC from sender 
+18:54:52,430 root DEBUG Committing transactions
+18:54:52,430 root DEBUG updating leaders
+18:54:52,431 root DEBUG Processed QC certificate
+18:54:52,431 root DEBUG Processing new round event
+18:54:52,431 root DEBUG new leader is 
+18:54:52,431 root DEBUG Generating block
+18:54:52,431 root DEBUG sending proposal message 
+18:54:56,435 root DEBUG Processing timeout message
+18:54:56,435 root DEBUG Processing QC from sender 
+18:54:56,435 root DEBUG updating leaders
+18:54:56,435 root DEBUG Processed QC certificate
+18:54:56,435 root DEBUG Processing QC from sender 
+18:54:56,435 root DEBUG updating leaders
+18:54:56,435 root DEBUG Processed QC certificate
+18:54:56,437 root DEBUG Processing timeout message
+18:54:56,437 root DEBUG Processing QC from sender 
+18:54:56,437 root DEBUG updating leaders
+18:54:56,437 root DEBUG Processed QC certificate
+18:54:56,437 root DEBUG Processing QC from sender 
+18:54:56,437 root DEBUG updating leaders
+18:54:56,437 root DEBUG Processed QC certificate
+18:54:56,438 root DEBUG Processing timeout message
+18:54:56,438 root DEBUG Processing QC from sender 
+18:54:56,438 root DEBUG updating leaders
+18:54:56,439 root DEBUG Processed QC certificate
+18:54:56,439 root DEBUG Processing QC from sender 
+18:54:56,439 root DEBUG updating leaders
+18:54:56,439 root DEBUG Processed QC certificate
+18:54:56,440 root DEBUG Processing timeout message
+18:54:56,440 root DEBUG Processing QC from sender 
+18:54:56,440 root DEBUG updating leaders
+18:54:56,440 root DEBUG Processed QC certificate
+18:54:56,440 root DEBUG Processing QC from sender 
+18:54:56,440 root DEBUG updating leaders
+18:54:56,440 root DEBUG Processed QC certificate
+18:54:56,441 root DEBUG Processing timeout message
+18:54:56,441 root DEBUG Processing QC from sender 
+18:54:56,441 root DEBUG updating leaders
+18:54:56,441 root DEBUG Processed QC certificate
+18:54:56,441 root DEBUG Processing QC from sender 
+18:54:56,441 root DEBUG updating leaders
+18:54:56,441 root DEBUG Processed QC certificate
+18:54:56,441 root DEBUG Processing timeout message
+18:54:56,442 root DEBUG Processing QC from sender 
+18:54:56,442 root DEBUG updating leaders
+18:54:56,442 root DEBUG Processed QC certificate
+18:54:56,442 root DEBUG Processing QC from sender 
+18:54:56,442 root DEBUG updating leaders
+18:54:56,442 root DEBUG Processed QC certificate
+18:54:56,443 root DEBUG Processing timeout message
+18:54:56,443 root DEBUG Processing QC from sender 
+18:54:56,443 root DEBUG updating leaders
+18:54:56,443 root DEBUG Processed QC certificate
+18:54:56,443 root DEBUG Processing QC from sender 
+18:54:56,443 root DEBUG updating leaders
+18:54:56,443 root DEBUG Processed QC certificate
+18:54:56,445 root DEBUG Processing timeout message
+18:54:56,445 root DEBUG Processing QC from sender 
+18:54:56,445 root DEBUG updating leaders
+18:54:56,445 root DEBUG Processed QC certificate
+18:54:56,445 root DEBUG Processing QC from sender 
+18:54:56,445 root DEBUG updating leaders
+18:54:56,445 root DEBUG Processed QC certificate
+18:54:56,446 root DEBUG sending timeout message
+18:55:00,450 root DEBUG Processing timeout message
+18:55:00,450 root DEBUG Processing QC from sender 
+18:55:00,450 root DEBUG updating leaders
+18:55:00,450 root DEBUG Processed QC certificate
+18:55:00,450 root DEBUG Processing QC from sender 
+18:55:00,451 root DEBUG updating leaders
+18:55:00,451 root DEBUG Processed QC certificate
+18:55:00,451 root DEBUG Processing new round event
+18:55:00,451 root DEBUG new leader is 
+18:55:00,452 root DEBUG Processing timeout message
+18:55:00,452 root DEBUG Processing QC from sender 
+18:55:00,452 root DEBUG updating leaders
+18:55:00,452 root DEBUG Processed QC certificate
+18:55:00,452 root DEBUG Processing QC from sender 
+18:55:00,452 root DEBUG updating leaders
+18:55:00,452 root DEBUG Processed QC certificate
+18:55:00,453 root DEBUG Processing timeout message
+18:55:00,454 root DEBUG Processing QC from sender 
+18:55:00,454 root DEBUG updating leaders
+18:55:00,454 root DEBUG Processed QC certificate
+18:55:00,454 root DEBUG Processing QC from sender 
+18:55:00,454 root DEBUG updating leaders
+18:55:00,454 root DEBUG Processed QC certificate
+18:55:00,455 root DEBUG Processing timeout message
+18:55:00,455 root DEBUG Processing QC from sender 
+18:55:00,455 root DEBUG updating leaders
+18:55:00,455 root DEBUG Processed QC certificate
+18:55:00,456 root DEBUG Processing QC from sender 
+18:55:00,456 root DEBUG updating leaders
+18:55:00,456 root DEBUG Processed QC certificate
+18:55:00,457 root DEBUG Processing proposal messagef22780bba5b017057c02fbebba3f1973634e5add29996c48ed04a94cde6d6a3c
+18:55:00,457 root DEBUG Processing QC from sender 
+18:55:00,457 root DEBUG updating leaders
+18:55:00,457 root DEBUG Processed QC certificate
+18:55:00,457 root DEBUG Processing QC from sender 
+18:55:00,457 root DEBUG updating leaders
+18:55:00,457 root DEBUG Processed QC certificate
+18:55:00,457 root DEBUG new leader is 
+18:55:00,458 root DEBUG New ledger state 
+18:55:00,458 root DEBUG Searching block with id
+18:55:00,458 root DEBUG Searching block with id
+18:55:00,458 root DEBUG Searching block with id
+18:55:00,458 root DEBUG Searching block with id
+18:55:00,458 root DEBUG Searching block with id
+18:55:00,458 root DEBUG Searching block with id
+18:55:00,458 root DEBUG Searching block with id
+18:55:00,458 root DEBUG Searching block with id
+18:55:00,458 root DEBUG Searching block with id
+18:55:00,458 root DEBUG Inserting block
+18:55:00,458 root DEBUG Leadger state is 
+18:55:00,458 root DEBUG Leadger state is 
+18:55:00,458 root DEBUG new leader is 
+18:55:04,461 root DEBUG Processing proposal message2fbba9b0d8cacce97c7b90712314ee211e9eded5fc1deb922f06e786b04d8920
+18:55:04,461 root DEBUG Processing QC from sender 
+18:55:04,462 root DEBUG updating leaders
+18:55:04,462 root DEBUG Processed QC certificate
+18:55:04,462 root DEBUG Processing QC from sender 
+18:55:04,462 root DEBUG updating leaders
+18:55:04,462 root DEBUG Processed QC certificate
+18:55:04,462 root DEBUG new leader is 
+18:55:04,462 root DEBUG New ledger state 
+18:55:04,462 root DEBUG Searching block with id
+18:55:04,462 root DEBUG Searching block with id
+18:55:04,462 root DEBUG Searching block with id
+18:55:04,462 root DEBUG Searching block with id
+18:55:04,462 root DEBUG Searching block with id
+18:55:04,462 root DEBUG Searching block with id
+18:55:04,462 root DEBUG Searching block with id
+18:55:04,462 root DEBUG Searching block with id
+18:55:04,462 root DEBUG Searching block with id
+18:55:04,463 root DEBUG Searching block with id
+18:55:04,463 root DEBUG Inserting block
+18:55:04,463 root DEBUG Leadger state is 
+18:55:04,463 root DEBUG Leadger state is 
+18:55:04,464 root DEBUG Leadger state is 
+18:55:04,464 root DEBUG new leader is 
+18:55:08,470 root DEBUG Processing proposal messaged5f09376439ed5a9d436105d2b68dd7c71dad54fcb5f939ddb3a86f22d99651e
+18:55:08,470 root DEBUG Processing QC from sender 
+18:55:08,471 root DEBUG Committing transactions
+18:55:08,471 root DEBUG updating leaders
+18:55:08,471 root DEBUG Processed QC certificate
+18:55:08,471 root DEBUG Processing QC from sender 
+18:55:08,471 root DEBUG updating leaders
+18:55:08,471 root DEBUG Processed QC certificate
+18:55:08,471 root DEBUG new leader is 
+18:55:08,471 root DEBUG New ledger state 
+18:55:08,471 root DEBUG Searching block with id
+18:55:08,472 root DEBUG Searching block with id
+18:55:08,472 root DEBUG Searching block with id
+18:55:08,472 root DEBUG Searching block with id
+18:55:08,472 root DEBUG Searching block with id
+18:55:08,472 root DEBUG Searching block with id
+18:55:08,472 root DEBUG Searching block with id
+18:55:08,472 root DEBUG Searching block with id
+18:55:08,472 root DEBUG Searching block with id
+18:55:08,472 root DEBUG Searching block with id
+18:55:08,472 root DEBUG Searching block with id
+18:55:08,472 root DEBUG Inserting block
+18:55:08,472 root DEBUG Leadger state is 
+18:55:08,472 root DEBUG Leadger state is 
+18:55:08,473 root DEBUG Leadger state is 
+18:55:08,473 root DEBUG new leader is 
+18:55:12,475 root DEBUG Processing vote message
+18:55:12,475 root DEBUG Processing vote
+18:55:12,475 root DEBUG Processing QC from sender 
+18:55:12,476 root DEBUG Processing vote message
+18:55:12,476 root DEBUG Processing vote
+18:55:12,476 root DEBUG Processing QC from sender 
+18:55:12,477 root DEBUG Processing vote message
+18:55:12,477 root DEBUG Processing vote
+18:55:12,477 root DEBUG Processing QC from sender 
+18:55:12,477 root DEBUG Processing QC from sender 
+18:55:12,478 root DEBUG Committing transactions
+18:55:12,478 root DEBUG updating leaders
+18:55:12,478 root DEBUG Processed QC certificate
+18:55:12,478 root DEBUG Processing new round event
+18:55:12,478 root DEBUG new leader is 
+18:55:12,479 root DEBUG Generating block
+18:55:12,479 root DEBUG sending proposal message 

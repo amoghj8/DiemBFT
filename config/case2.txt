@@ -1,0 +1,7 @@
+[config]
+ngst=3000
+delta=0.25
+no_clients=3
+no_replicas=3
+no_faulty_replicas=1
+no_client_requests=5
